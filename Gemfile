@@ -45,5 +45,8 @@ group :development, :test do
   # Rspec helps to use BDD/TDD approach
   gem 'rspec-rails', '~> 3.0'
 
+  # Factory girl helps generate test models
+  gem "factory_girl_rails", "~> 4.0"
+
 end
 
