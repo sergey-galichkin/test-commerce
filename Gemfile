@@ -18,6 +18,8 @@ gem 'coffee-rails', '~> 4.1.0'
 gem 'apartment'
 #bootstrap CSS
 gem 'bootstrap-sass'
+# Devise is a flexible authentication solution for Rails based on Warden
+gem 'devise'
 
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
