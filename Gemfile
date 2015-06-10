@@ -60,3 +60,11 @@ group :development, :test do
   
 end
 
+group :test do
+  gem 'cucumber-rails', '~> 1.4.2', require: false
+  gem 'database_cleaner', '~> 1.4.1'
+  gem 'rspec-rails', '~> 3.2.3'
+  gem 'factory_girl', '~> 4.5.0'
+  gem 'rspec-expectations', '~> 3.2.1'
+  gem 'factory_girl_rails', '~> 4.0'
+end
