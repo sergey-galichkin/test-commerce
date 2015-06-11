@@ -15,11 +15,11 @@ gem 'coffee-rails', '~> 4.1.0'
 # gem 'therubyracer', platforms: :ruby
 
 # Use apartment for multi-tenant databases
-gem 'apartment'
+#gem 'apartment'
 #bootstrap CSS
-gem 'bootstrap-sass'
+#gem 'bootstrap-sass'
 # Devise is a flexible authentication solution for Rails based on Warden
-gem 'devise'
+#gem 'devise'
 
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
@@ -48,16 +48,6 @@ group :development, :test do
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-
-  # Rspec helps to use BDD/TDD approach
-  gem 'rspec-rails', '~> 3.0'
-
-  # Factory girl helps generate test models
-  gem 'factory_girl_rails', '~> 4.0'
-
-  # Faker helps to generate test data
-  gem 'faker'
-  
 end
 
 group :test do
@@ -67,4 +57,5 @@ group :test do
   gem 'factory_girl', '~> 4.5.0'
   gem 'rspec-expectations', '~> 3.2.1'
   gem 'factory_girl_rails', '~> 4.0'
+  gem 'faker'
 end
