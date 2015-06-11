@@ -14,6 +14,8 @@
 ActiveRecord::Schema.define(version: 20150611120047) do
 
   create_table "accounts", force: :cascade do |t|
+    t.string   "name",       null: false
+    t.string   "subdomain",  null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
