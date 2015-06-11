@@ -5,8 +5,6 @@ Registering new account
 
   Scenario: user registares new account
 
-  Scenario: user confirms registration
-
   Scenario: user enters invalid login
 
   Scenario: user enters existing logon
@@ -16,4 +14,10 @@ Registering new account
   Scenario: user re-enters blank password
 
   Scenario: user re-enters incorrect password
+
+  Scenario: user confirms registration
+
+  Scenario: user logs in without confirming registration
+
+  
 
