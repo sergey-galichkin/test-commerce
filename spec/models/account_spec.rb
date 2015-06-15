@@ -6,7 +6,6 @@ RSpec.describe Account, type: :model do
 
   it {is_expected.to validate_presence_of(:subdomain)}
 
-  subject{build(:account)}
-  it {is_expected.to validate_uniqueness_of(:subdomain).case_insensitive}
+  it {expect(build(:account)).to validate_uniqueness_of(:subdomain).case_insensitive}
 
 end
