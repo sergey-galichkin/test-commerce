@@ -20,6 +20,8 @@ ActiveRecord::Schema.define(version: 20150611120047) do
     t.datetime "updated_at", null: false
   end
 
+  add_index "accounts", ["subdomain"], name: "index_accounts_on_subdomain", unique: true
+
   create_table "users", force: :cascade do |t|
     t.string   "email",                  default: "", null: false
     t.string   "encrypted_password",     default: "", null: false
