@@ -97,4 +97,19 @@ RSpec.configure do |config|
  
   # Use the specified formatter
   config.formatter = :documentation # :progress, :html, :textmate
+
+  # DatabaseCleaner configuration
+  config.before(:suite) do
+     # Clean all tables to start
+    DatabaseCleaner.clean_with :truncation
+    # Use transactions for tests
+    DatabaseCleaner.strategy = :transaction
+  end
+
+  config.around(:each) do |example|
+    DatabaseCleaner.cleaning do
+      example.run
+    end
+  end
+
 end

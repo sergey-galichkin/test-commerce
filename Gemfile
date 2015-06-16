@@ -15,7 +15,7 @@ gem 'coffee-rails', '~> 4.1.0'
 # gem 'therubyracer', platforms: :ruby
 
 # Use apartment for multi-tenant databases
-#gem 'apartment', '~> 1.0.1'
+gem 'apartment', '~> 1.0.1'
 
 #bootstrap CSS
 #gem 'bootstrap-sass'
