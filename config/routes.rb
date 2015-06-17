@@ -6,6 +6,12 @@ Rails.application.routes.draw do
   # You can have the root of your site routed with "root"
   root 'home#index'
 
+  resources :accounts, only: [:new, :create] do
+    constraints subdomain: /.+/ do
+      get 'login_with_token', on: :new
+    end
+  end
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 
