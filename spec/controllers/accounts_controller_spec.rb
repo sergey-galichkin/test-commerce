@@ -1,6 +1,34 @@
 require 'rails_helper'
 
+RSpec.shared_examples "when create parameters are invalid" do
+  it { is_expected.to have_http_status(:ok) }
+
+  it { is_expected.to render_template(:new) }
+end
+
+RSpec.shared_examples "when login parameters are invalid" do
+  before(:each) do
+    Account.create(subdomain:'testdomain', name: 'testaccount', registration_token: SecureRandom.uuid)
+    Apartment::Tenant.create 'testdomain'
+    Apartment::Tenant.switch! 'testdomain'
+    User.create(email: 'admin@mail.com', password: '12345678')
+  end
+  after(:each) { Apartment::Tenant.drop('testdomain') rescue nil }
+
+  subject { request }
+
+  it { is_expected.to have_http_status(:redirect) }
+
+  it { is_expected.to redirect_to(new_account_url subdomain: false) }
+
+  it "resets tenant" do
+    request
+    expect(Apartment::Tenant.current).to eq('public')
+  end
+end
+
 RSpec.describe AccountsController, type: :controller do
+
   describe "GET #new" do
     subject { get :new }
 
@@ -20,26 +48,13 @@ RSpec.describe AccountsController, type: :controller do
 
       before(:each) { Account.create(subdomain:'testdomain', name: 'testaccount') }
 
-      it { is_expected.to have_http_status(:ok) }
-
-      it { is_expected.to render_template(:new) }
-
-      it "sets flash message" do
-        request
-        expect(controller).to set_flash[:alert].to(/already registered/)
-      end
+      it_behaves_like "when create parameters are invalid"
     end
 
     context "when AccountOwner role does not exist" do
 
-      it { is_expected.to have_http_status(:ok) }
+      it_behaves_like "when create parameters are invalid"
 
-      it { is_expected.to render_template(:new) }
-
-      it "sets flash message" do
-        request
-        expect(controller).to set_flash[:alert].to(/exception has occured during account creation/)
-      end
     end
 
     context "when successful" do
@@ -68,6 +83,62 @@ RSpec.describe AccountsController, type: :controller do
                params: { email: 'admin@mail.com',
                         token: Account.find_by(name: 'testaccount').registration_token })
       }
+    end
+  end
+
+  describe "GET #login_with_token" do
+    context "when email in params is missing" do
+      it_behaves_like "when login parameters are invalid" do
+        let(:request) { get :login_with_token, token: '123' }
+      end
+    end
+
+    context "when token in params is missing" do
+      it_behaves_like "when login parameters are invalid" do
+        let(:request) { get :login_with_token, email: 'admin@mail.com' }
+      end
+    end
+
+    context "when email in params is wrong" do
+      it_behaves_like "when login parameters are invalid" do
+        let(:request) { get :login_with_token, email: 'wrong@mail.com',
+                        token: Account.find_by(name: 'testaccount').registration_token }
+      end
+    end
+
+    context "when token in params is wrong" do
+      it_behaves_like "when login parameters are invalid" do
+        let(:request) { get :login_with_token, email: 'admin@mail.com', token: 'wrong_token' }
+      end
+    end
+
+    context "when successfull" do
+      before(:each) do
+        Account.create(subdomain:'testdomain', name: 'testaccount', registration_token: SecureRandom.uuid)
+        Apartment::Tenant.create 'testdomain'
+        Apartment::Tenant.switch! 'testdomain'
+        User.create(email: 'admin@mail.com', password: '12345678')
+      end
+      after(:each) { Apartment::Tenant.drop('testdomain') rescue nil }
+      let(:request) { get :login_with_token, email: 'admin@mail.com',
+                      token: Account.find_by(name: 'testaccount').registration_token }
+
+      subject { request }
+
+      it "resets registration_token" do
+        request
+        expect(Account.find_by(name: 'testaccount').registration_token).to be_nil
+      end
+
+      it "logins user" do
+        request
+        expect(controller).to be_user_signed_in
+      end
+
+      it { is_expected.to have_http_status(:redirect) }
+
+      it { is_expected.to redirect_to(:root) }
+
     end
   end
 end
