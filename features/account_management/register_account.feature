@@ -5,7 +5,7 @@ User info, used for registrartion - email(login), password, password re-type, su
 
   Scenario: user opens new account registration form
   	Given user visits start page
-  	When user presses "Register" button
+    When user clicks "Registration" link
   	Then user is redirected to "create new account" page
   	And registration page contains all fields
 

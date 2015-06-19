@@ -55,6 +55,7 @@ end
 
 group :test do
   gem 'cucumber-rails', '~> 1.4.2', require: false
+  gem 'capybara', '~> 2.4.4'
   gem 'database_cleaner', '~> 1.4.1'
   gem 'rspec-rails', '~> 3.2.3'
   gem 'factory_girl', '~> 4.5.0'

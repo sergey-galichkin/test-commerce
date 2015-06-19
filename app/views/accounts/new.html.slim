@@ -1,0 +1,18 @@
+=form_tag accounts_path
+
+  =label_tag(:name, 'name')
+  =text_field_tag(:name)
+
+  =label_tag(:subdomain, 'subdomain')
+  =text_field_tag(:subdomain)
+
+  =label_tag(:email, 'email')
+  =text_field_tag(:email)
+
+  =label_tag(:password, 'password')
+  =text_field_tag(:password)
+
+  =label_tag(:confirm_password, 'confirm_password')
+  =text_field_tag(:confirm_password)
+
+  =submit_tag 'Create'
