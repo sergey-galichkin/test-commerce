@@ -1,18 +1,18 @@
-=form_tag accounts_path
+= form_tag accounts_path
 
-  =label_tag(:name, 'name')
-  =text_field_tag(:name)
+  = label :account, :name
+  = text_field :account, :name
 
-  =label_tag(:subdomain, 'subdomain')
-  =text_field_tag(:subdomain)
+  = label :account, :subdomain
+  = text_field :account,:subdomain
 
-  =label_tag(:email, 'email')
-  =text_field_tag(:email)
+  = label :account, :email
+  = email_field :account, :email
 
-  =label_tag(:password, 'password')
-  =text_field_tag(:password)
+  = label :account, :password
+  = password_field :account, :password
 
-  =label_tag(:confirm_password, 'confirm_password')
-  =text_field_tag(:confirm_password)
+  = label :account, :confirm_password
+  = password_field :account, :confirm_password
 
-  =submit_tag 'Create'
+  = submit_tag 'Create'
