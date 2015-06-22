@@ -106,6 +106,10 @@ RSpec.configure do |config|
     DatabaseCleaner.strategy = :transaction
   end
 
+  config.before(:each) do
+    Account.destroy_all
+  end
+
   config.around(:each) do |example|
     DatabaseCleaner.cleaning do
       example.run
