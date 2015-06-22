@@ -138,9 +138,9 @@ RSpec.describe AccountsController, type: :controller do
         expect(controller).to be_user_signed_in
       end
 
-      it { is_expected.to have_http_status(:redirect) }
+      it { is_expected.to have_http_status(:ok) }
 
-      it { is_expected.to redirect_to(:root) }
+      it { is_expected.to render_template(:account_created) }
 
     end
   end

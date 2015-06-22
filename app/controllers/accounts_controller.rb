@@ -6,7 +6,7 @@ class AccountsController < ApplicationController
   # POST /accounts
   def create
     subdomain = account_params[:subdomain]
-    return if subdomain_exists? subdomain
+    return render :new if subdomain_exists? subdomain
 
     token = SecureRandom.uuid
 
@@ -29,8 +29,8 @@ class AccountsController < ApplicationController
 
   # GET /accounts/new/login_with_token
   def login_with_token
-    return unless login_params_present?
-    return if login_params_wrong?
+    return handle_wrong_login_params unless login_params_present?
+    return handle_wrong_login_params unless login_params_valid?
 
     account = Account.find_by(registration_token: params.require(:token), subdomain: Apartment::Tenant.current)
     account.update(registration_token: nil)
@@ -38,7 +38,7 @@ class AccountsController < ApplicationController
     user = User.find_by(email: params.require(:email))
     sign_in user, bypass: true
 
-    redirect_to :root
+    render :account_created
   end
 
   private
@@ -56,11 +56,7 @@ class AccountsController < ApplicationController
   end
 
   def subdomain_exists?(subdomain)
-    if Account.exists?(subdomain: subdomain)
-      render :new
-      return true
-    end
-    false
+    Account.exists?(subdomain: subdomain)
   end
 
   def create_account(subdomain, token)
@@ -86,18 +82,11 @@ class AccountsController < ApplicationController
   end
 
   def login_params_present?
-    return true if params.key?(:email) && params.key?(:token)
-
-    handle_wrong_login_params
-
-    false
+    params.key?(:email) && params.key?(:token)
   end
 
-  def login_params_wrong?
-    unless User.exists?(email: params.required(:email)) && Account.exists?(registration_token: params.required(:token))
-      handle_wrong_login_params
-      true
-    end
+  def login_params_valid?
+    User.exists?(email: params.required(:email)) && Account.exists?(registration_token: params.required(:token))
   end
 
   def handle_wrong_login_params
