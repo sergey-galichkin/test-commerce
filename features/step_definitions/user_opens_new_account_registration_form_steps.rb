@@ -21,5 +21,5 @@ Then(/^registration page contains all fields$/) do
 
   expect(page).to have_field('Confirm password', type: 'password')
 
-  expect(page).to have_selector(:button, 'Create Account')
+  expect(page).to have_button('Create Account')
 end
