@@ -9,6 +9,8 @@ RSpec.describe User, type: :model do
 
     it {expect(build(:user)).to validate_uniqueness_of(:email)}
 
+    it {is_expected.to validate_presence_of(:role)}
+
     it {is_expected.to belong_to(:role)}
   end
 end
