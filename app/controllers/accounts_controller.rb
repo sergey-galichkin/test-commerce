@@ -10,21 +10,29 @@ class AccountsController < ApplicationController
 
     token = SecureRandom.uuid
 
+    role = Role.find_by name: 'AccountOwner'
+    account = Account.new account_params
+    account.registration_token = token
     begin
-      Account.transaction do
-        create_account(subdomain, token)
-
-        create_and_switch_tenant(subdomain)
-
-        create_user
+      if account.save
+        Apartment::Tenant.create(subdomain)
+        Apartment::Tenant.switch!(subdomain)
+        user = User.create(email: user_params[:email], password: user_params[:password], role_id: role.id)
+        if user.persisted?
+          redirect_to url_for(action: :login_with_token, subdomain: subdomain, token: token, email: user_params[:email])
+        else
+          account.destroy
+          Apartment::Tenant.reset
+          render :new
+        end
+      else
+        render :new
       end
     rescue => e
-      return handle_error(e, subdomain)
+      account.destroy
+      Apartment::Tenant.reset
+      render :new
     end
-
-    redirect_to url_for(action: :login_with_token,
-                        subdomain: subdomain,
-                        token: token, email: user_params[:email])
   end
 
   # GET /accounts/new/login_with_token
@@ -57,28 +65,6 @@ class AccountsController < ApplicationController
 
   def subdomain_exists?(subdomain)
     Account.exists?(subdomain: subdomain)
-  end
-
-  def create_account(subdomain, token)
-    Account.create!(name: account_params[:name],
-                    subdomain: subdomain,
-                    registration_token: token)
-  end
-
-  def create_and_switch_tenant(subdomain)
-    Apartment::Tenant.create(subdomain)
-    Apartment::Tenant.switch!(subdomain)
-  end
-
-  def create_user
-    role = Role.find_by name: 'AccountOwner' # TODO: use permission instead of name
-    User.create!(email: user_params[:email], password: user_params[:password], role_id: role.id)
-  end
-
-  def handle_error(e, subdomain)
-    logger.error { "#{e.message} #{e.backtrace.join("\n")}" }
-    Apartment::Tenant.drop(subdomain) rescue nil
-    render :new
   end
 
   def login_params_present?

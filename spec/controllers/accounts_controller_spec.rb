@@ -1,15 +1,14 @@
 require 'rails_helper'
 
-$subdomain = 'testdomain'
-$email = 'admin@mail.com'
+RSpec.shared_examples "when account could not be created" do
+  let!(:acc_count) { Account.count }
 
-RSpec.shared_examples "when create parameters are invalid" do
   it { is_expected.to have_http_status(:ok) }
 
   it { is_expected.to render_template(:new) }
 
   it "didn't create Account" do
-    expect(Account.count).to eq 0
+   expect(Account.count).to eq acc_count
   end
 
   it "didn't create User" do
@@ -19,12 +18,12 @@ end
 
 RSpec.shared_examples "when login parameters are invalid" do
   before(:each) do
-    create(:account, subdomain:$subdomain, registration_token: SecureRandom.uuid)
-    Apartment::Tenant.create $subdomain
-    Apartment::Tenant.switch! $subdomain
+    create(:account, subdomain: subdomain, registration_token: SecureRandom.uuid)
+    Apartment::Tenant.create subdomain
+    Apartment::Tenant.switch! subdomain
     create(:user)
   end
-  after(:each) { Apartment::Tenant.drop($subdomain) rescue nil }
+  after(:each) { Apartment::Tenant.drop(subdomain) rescue nil }
 
   subject { request }
 
@@ -39,107 +38,71 @@ RSpec.shared_examples "when login parameters are invalid" do
 end
 
 RSpec.describe AccountsController, type: :controller do
+  let(:params) { { name: 'testaccount', subdomain: subdomain, email: email, password: '12345678' } } 
+  let(:subdomain) { 'testdomain' }
+  let(:email) { 'admin@mail.com' }
+  subject { response }
 
   describe "GET #new" do
-    subject { get :new }
+    before(:each) { get :new }
 
     it { is_expected.to have_http_status(:ok) }
 
     it { is_expected.to render_template(:new) }
   end
 
-  describe "POST #create" do
-    let(:request) { post :create, account: { name: 'testaccount',
-                                             subdomain: $subdomain,
-                                             email: $email,
-                                             password: '12345678' } }
-    subject { request }
+  context "when AccountOwner role does not exist" do
+    describe "POST #create" do
+      before(:each) { post :create, account: params }
+      it_behaves_like "when account could not be created"
+    end
+  end
+
+  context "when AccountOwner role exists" do
+    before(:each) { create(:account_owner) }
 
     context "when subdomain already exists" do
+      before(:each) { create(:account, subdomain: subdomain) }
 
-      before(:each) { create(:account, subdomain: $subdomain) }
+      describe "POST #create" do
+        before(:each) { post :create, account: params }
 
-      it { is_expected.to have_http_status(:ok) }
-      it { is_expected.to render_template(:new) }
-      it "didn't create Account" do
-        expect(Account.count).to eq 1
-      end
-      it "didn't create User" do
-        expect(User.count).to eq 0
+        it_behaves_like "when account could not be created"
       end
     end
 
-    context "when AccountOwner role does not exist" do
+    describe "POST #create" do
+      let(:account_params) { params }
+      before(:each) { post :create, account: account_params }
 
-      it_behaves_like "when create parameters are invalid"
-
-    end
-
-    context "when name missing" do
-
-      it_behaves_like "when create parameters are invalid" do
-        before(:each) { create(:role, name: 'AccountOwner') }
-        let(:request) { post :create, account: { subdomain: $subdomain,
-                                                 email: $email,
-                                                 password: '12345678' } }
-      end
-    end
-
-    context "when subdomain missing" do
-
-      it_behaves_like "when create parameters are invalid" do
-        before(:each) { create(:role, name: 'AccountOwner') }
-        let(:request) { post :create, account: { name: 'testaccount',
-                                                 email: $email,
-                                                 password: '12345678' } }
-      end
-    end
-
-    context "when email missing" do
-
-      it_behaves_like "when create parameters are invalid" do
-        before(:each) { create(:role, name: 'AccountOwner') }
-        let(:request) { post :create, account: { name: 'testaccount',
-                                                 subdomain: $subdomain,
-                                                 password: '12345678' } }
-      end
-    end
-
-    context "when password missing" do
-
-      it_behaves_like "when create parameters are invalid" do
-        before(:each) { create(:role, name: 'AccountOwner') }
-        let(:request) { post :create, account: { name: 'testaccount',
-                                                 subdomain: $subdomain,
-                                                 email: $email } }
-      end
-    end
-
-    context "when successful" do
-      before(:each) { create(:role, name: 'AccountOwner') }
-
-      it "creates Account" do
-        request
-        expect(Account.find_by subdomain: $subdomain).to be
+      [:name, :subdomain, :email, :password].each do |param|
+        context "when #{param} missing" do
+          let(:account_params) { params.reject { |key, value| key == param } }
+          it_behaves_like "when account could not be created"
+        end
       end
 
-      it "creates User" do
-        request
-        expect(User.find_by email: $email).to be
+      context "when successful" do
+
+        it "creates Account" do
+          expect(Account).to be_exist subdomain: subdomain
+        end
+
+        it "creates User" do
+          expect(User).to be_exist email: email
+        end
+
+        it "switches tenant" do
+          expect(Apartment::Tenant.current).to eq(subdomain)
+        end
+
+        it { is_expected.to have_http_status(:redirect) }
+
+        it do
+          params = { email: email, token: Account.find_by(subdomain: subdomain).registration_token }
+          is_expected.to redirect_to(login_with_token_new_account_url subdomain: subdomain, params: params)
+        end
       end
-
-      it "switches tenant" do
-        request
-        expect(Apartment::Tenant.current).to eq($subdomain)
-      end
-
-      it { is_expected.to have_http_status(:redirect) }
-
-      it { is_expected.to redirect_to(
-            login_with_token_new_account_url subdomain: $subdomain,
-               params: { email: $email,
-                        token: Account.find_by(subdomain: $subdomain).registration_token })
-      }
     end
   end
 
@@ -152,39 +115,38 @@ RSpec.describe AccountsController, type: :controller do
 
     context "when token in params is missing" do
       it_behaves_like "when login parameters are invalid" do
-        let(:request) { get :login_with_token, email: $email }
+        let(:request) { get :login_with_token, email: email }
       end
     end
 
     context "when email in params is wrong" do
       it_behaves_like "when login parameters are invalid" do
         let(:request) { get :login_with_token, email: 'wrong@mail.com',
-                        token: Account.find_by(subdomain: $subdomain).registration_token }
+                        token: Account.find_by(subdomain: subdomain).registration_token }
       end
     end
 
     context "when token in params is wrong" do
       it_behaves_like "when login parameters are invalid" do
-        let(:request) { get :login_with_token, email: $email, token: 'wrong_token' }
+        let(:request) { get :login_with_token, email: email, token: 'wrong_token' }
       end
     end
 
     context "when successfull" do
       before(:each) do
-        create(:account, subdomain: $subdomain, registration_token: SecureRandom.uuid)
-        Apartment::Tenant.create $subdomain
-        Apartment::Tenant.switch! $subdomain
-        create(:user, email: $email)
+        create(:account, subdomain: subdomain, registration_token: SecureRandom.uuid)
+        Apartment::Tenant.create subdomain
+        Apartment::Tenant.switch! subdomain
+        create(:user, email: email)
       end
-#      after(:each) { Apartment::Tenant.drop($subdomain) rescue nil }
-      let(:request) { get :login_with_token, email: $email,
-                      token: Account.find_by(subdomain: $subdomain).registration_token }
+      let(:request) { get :login_with_token, email: email,
+                      token: Account.find_by(subdomain: subdomain).registration_token }
 
       subject { request }
 
       it "resets registration_token" do
         request
-        expect(Account.find_by(subdomain: $subdomain).registration_token).to be_nil
+        expect(Account.find_by(subdomain: subdomain).registration_token).to be_nil
       end
 
       it "logins user" do
