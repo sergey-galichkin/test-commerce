@@ -9,11 +9,11 @@ RSpec.shared_examples "when create parameters are invalid" do
   it { is_expected.to render_template(:new) }
 
   it "didn't create Account" do
-    expect(Account.count).to be == 0
+    expect(Account.count).to eq 0
   end
 
   it "didn't create User" do
-    expect(User.count).to be == 0
+    expect(User.count).to eq 0
   end
 end
 
@@ -62,10 +62,10 @@ RSpec.describe AccountsController, type: :controller do
       it { is_expected.to have_http_status(:ok) }
       it { is_expected.to render_template(:new) }
       it "didn't create Account" do
-        expect(Account.count).to be == 1
+        expect(Account.count).to eq 1
       end
       it "didn't create User" do
-        expect(User.count).to be == 0
+        expect(User.count).to eq 0
       end
     end
 
