@@ -7,6 +7,14 @@ RSpec.shared_examples "when create parameters are invalid" do
   it { is_expected.to have_http_status(:ok) }
 
   it { is_expected.to render_template(:new) }
+
+  it "didn't create Account" do
+    expect(Account.count).to be == 0
+  end
+
+  it "didn't create User" do
+    expect(User.count).to be == 0
+  end
 end
 
 RSpec.shared_examples "when login parameters are invalid" do
@@ -51,7 +59,14 @@ RSpec.describe AccountsController, type: :controller do
 
       before(:each) { create(:account, subdomain: $subdomain) }
 
-      it_behaves_like "when create parameters are invalid"
+      it { is_expected.to have_http_status(:ok) }
+      it { is_expected.to render_template(:new) }
+      it "didn't create Account" do
+        expect(Account.count).to be == 1
+      end
+      it "didn't create User" do
+        expect(User.count).to be == 0
+      end
     end
 
     context "when AccountOwner role does not exist" do
@@ -60,9 +75,48 @@ RSpec.describe AccountsController, type: :controller do
 
     end
 
+    context "when name missing" do
+
+      it_behaves_like "when create parameters are invalid" do
+        before(:each) { create(:role, name: 'AccountOwner') }
+        let(:request) { post :create, account: { subdomain: $subdomain,
+                                                 email: $email,
+                                                 password: '12345678' } }
+      end
+    end
+
+    context "when subdomain missing" do
+
+      it_behaves_like "when create parameters are invalid" do
+        before(:each) { create(:role, name: 'AccountOwner') }
+        let(:request) { post :create, account: { name: 'testaccount',
+                                                 email: $email,
+                                                 password: '12345678' } }
+      end
+    end
+
+    context "when email missing" do
+
+      it_behaves_like "when create parameters are invalid" do
+        before(:each) { create(:role, name: 'AccountOwner') }
+        let(:request) { post :create, account: { name: 'testaccount',
+                                                 subdomain: $subdomain,
+                                                 password: '12345678' } }
+      end
+    end
+
+    context "when password missing" do
+
+      it_behaves_like "when create parameters are invalid" do
+        before(:each) { create(:role, name: 'AccountOwner') }
+        let(:request) { post :create, account: { name: 'testaccount',
+                                                 subdomain: $subdomain,
+                                                 email: $email } }
+      end
+    end
+
     context "when successful" do
       before(:each) { create(:role, name: 'AccountOwner') }
-      after(:each) { Apartment::Tenant.drop($subdomain) rescue nil }
 
       it "creates Account" do
         request
@@ -122,7 +176,7 @@ RSpec.describe AccountsController, type: :controller do
         Apartment::Tenant.switch! $subdomain
         create(:user, email: $email)
       end
-      after(:each) { Apartment::Tenant.drop($subdomain) rescue nil }
+#      after(:each) { Apartment::Tenant.drop($subdomain) rescue nil }
       let(:request) { get :login_with_token, email: $email,
                       token: Account.find_by(subdomain: $subdomain).registration_token }
 
