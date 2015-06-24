@@ -11,6 +11,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 0) do
+ActiveRecord::Schema.define(version: 20150624130545) do
+
+  create_table "theme_statuses", force: :cascade do |t|
+    t.string "name", limit: 20, null: false
+  end
+
+  create_table "themes", force: :cascade do |t|
+    t.string  "name",            limit: 100,  null: false
+    t.string  "zip_file_url",    limit: 2000, null: false
+    t.integer "theme_status_id",              null: false
+  end
 
 end

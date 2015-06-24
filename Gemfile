@@ -59,6 +59,7 @@ group :test do
   gem 'factory_girl', '~> 4.5.0'
   gem 'rspec-expectations', '~> 3.2.1'
   gem 'factory_girl_rails', '~> 4.0'
+  gem 'shoulda-matchers', '~> 2.8.0'
   gem 'faker', '~> 1.4.3'
   #gem 'capybara', '~> 2.4.4'
 end
