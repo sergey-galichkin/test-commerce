@@ -7,7 +7,7 @@ When(/^user clicks "(.*?)" link$/) do |arg1|
 end
 
 Then(/^user is redirected to "(.*?)" page$/) do |arg1|
-  expect(current_path).to eql(new_account_path) # TODO how to use arg1 here?
+  expect(current_path).to eql(arg1)
 end
 
 Then(/^registration page contains all fields$/) do
