@@ -22,20 +22,12 @@ RSpec.shared_examples "when account could not be created" do
 end
 
 RSpec.shared_examples "when login parameters are invalid" do
-  before(:each) do
-    create(:account, subdomain: subdomain, registration_token: SecureRandom.uuid)
-    Apartment::Tenant.switch! subdomain
-    create(:user)
-  end
-
-  subject { request }
 
   it { is_expected.to have_http_status(:redirect) }
 
   it { is_expected.to redirect_to(new_account_url subdomain: false) }
 
   it "resets tenant" do
-    request
     expect(Apartment::Tenant.current).to eq('public')
   end
 end
@@ -102,7 +94,7 @@ RSpec.describe AccountsController, type: :controller do
         it { is_expected.to have_http_status(:redirect) }
 
         it do
-          params = { email: email, token: Account.find_by(subdomain: subdomain).registration_token }
+          params = { email: email, token: Account.last.registration_token }
           is_expected.to redirect_to(login_with_token_new_account_url subdomain: subdomain, params: params)
         end
       end
@@ -110,49 +102,34 @@ RSpec.describe AccountsController, type: :controller do
   end
 
   describe "GET #login_with_token" do
-    context "when email in params is missing" do
-      it_behaves_like "when login parameters are invalid" do
-        let(:request) { get :login_with_token, token: 'dont_care' }
-      end
-    end
+    let(:params) { { email: create(:user).email, token: account.registration_token } }
+    let(:account) { create :account }
+    before(:each) { Apartment::Tenant.switch! account.subdomain }
 
-    context "when token in params is missing" do
-      it_behaves_like "when login parameters are invalid" do
-        let(:request) { get :login_with_token, email: email }
-      end
-    end
+    context "when invalid params" do
+      before(:each) { get :login_with_token, wrong_params }
 
-    context "when email in params is wrong" do
-      it_behaves_like "when login parameters are invalid" do
-        let(:request) { get :login_with_token, email: 'wrong@mail.com',
-                        token: Account.find_by(subdomain: subdomain).registration_token }
-      end
-    end
+      [:email, :token].each do |param|
+        context "when #{param} wrong" do
+          let(:wrong_params) { params.merge({ param => "wrong" }) }
+          it_behaves_like "when login parameters are invalid"
+        end
 
-    context "when token in params is wrong" do
-      it_behaves_like "when login parameters are invalid" do
-        let(:request) { get :login_with_token, email: email, token: 'wrong_token' }
+        context "when #{param} missing" do
+          let(:wrong_params) { params.reject { |key, value| key == param } }
+          it_behaves_like "when login parameters are invalid"
+        end
       end
     end
 
     context "when successfull" do
-      before(:each) do
-        create(:account, subdomain: subdomain, registration_token: SecureRandom.uuid)
-        Apartment::Tenant.switch! subdomain
-        create(:user, email: email)
-      end
-      let(:request) { get :login_with_token, email: email,
-                      token: Account.find_by(subdomain: subdomain).registration_token }
-
-      subject { request }
+      before(:each) { get :login_with_token, params }
 
       it "resets registration_token" do
-        request
-        expect(Account.find_by(subdomain: subdomain).registration_token).to be_nil
+        expect(account.reload.registration_token).to be_nil
       end
 
       it "logins user" do
-        request
         expect(controller).to be_user_signed_in
       end
 

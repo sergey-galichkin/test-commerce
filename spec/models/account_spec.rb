@@ -21,9 +21,8 @@ RSpec.describe Account, type: :model do
 
   context "when destroy" do
     it "drops tenant" do
-      subdomain= acc.subdomain
       acc.destroy
-      expect { Apartment::Tenant.switch! subdomain }.to raise_error(Apartment::TenantNotFound)
+      expect { Apartment::Tenant.switch! acc.subdomain }.to raise_error(Apartment::TenantNotFound)
     end
   end
 end
