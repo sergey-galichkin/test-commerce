@@ -12,18 +12,21 @@ RSpec.shared_examples "when account could not be created" do
   end
 
   it "didn't create User" do
-    expect(User.count).to eq 0
+    expect(User.count).to be_zero
   end
+
+  it "resets tenant" do
+    expect(Apartment::Tenant.current).to eq('public')
+  end
+
 end
 
 RSpec.shared_examples "when login parameters are invalid" do
   before(:each) do
     create(:account, subdomain: subdomain, registration_token: SecureRandom.uuid)
-    Apartment::Tenant.create subdomain
     Apartment::Tenant.switch! subdomain
     create(:user)
   end
-  after(:each) { Apartment::Tenant.drop(subdomain) rescue nil }
 
   subject { request }
 
@@ -135,7 +138,6 @@ RSpec.describe AccountsController, type: :controller do
     context "when successfull" do
       before(:each) do
         create(:account, subdomain: subdomain, registration_token: SecureRandom.uuid)
-        Apartment::Tenant.create subdomain
         Apartment::Tenant.switch! subdomain
         create(:user, email: email)
       end

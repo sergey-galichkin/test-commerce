@@ -15,7 +15,6 @@ class AccountsController < ApplicationController
     account.registration_token = token
     begin
       if account.save
-        Apartment::Tenant.create(subdomain)
         Apartment::Tenant.switch!(subdomain)
         user = User.create(email: user_params[:email], password: user_params[:password], role_id: role.id)
         if user.persisted?
