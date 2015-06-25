@@ -26,11 +26,11 @@ class AccountsController < ApplicationController
 
   # GET /accounts/new/login_with_token
   def login_with_token
-    return handle_wrong_login_params unless login_params_present?
+    return handle_wrong_login_params unless params.key?(:email) && params.key?(:token)
 
     account = Account.find_by_registration_token_and_subdomain params[:token], Apartment::Tenant.current
     user = User.find_by_email params[:email]
-    return handle_wrong_login_params if account.nil? || user.nil?
+    return handle_wrong_login_params unless account && user
 
     account.update registration_token: nil
     sign_in user, bypass: true
@@ -46,10 +46,6 @@ class AccountsController < ApplicationController
 
   def user_params
     params.require(:account).permit(:email, :password)
-  end
-
-  def login_params_present?
-    params.key?(:email) && params.key?(:token)
   end
 
   def handle_wrong_login_params
