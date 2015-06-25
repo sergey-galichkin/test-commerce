@@ -7,13 +7,13 @@ Rails.application.routes.draw do
   root 'home#index'
 
   # Put here routes to domain-resource only
-  constraints subdomain: /^$/ do
+  constraints ->(request) { request.subdomain.blank? } do
     resources :accounts, only: [:new, :create]
   end
 
   # Put here routes to tenant-resource only
-  constraints subdomain: /.+/ do
-    get 'accounts/new/login_with_token' => 'accounts#login_with_token'
+  constraints ->(request) { request.subdomain.present? } do
+    get 'accounts/login_with_token' => 'accounts#login_with_token'
   end
 
   # Example of regular route:

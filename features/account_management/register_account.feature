@@ -4,16 +4,16 @@ User info, used for registrartion - email(login), password, password re-type, su
 
 
   Scenario: user opens new account registration form
-  	Given user visits start page
+    Given user visits start page
     When user clicks "Registration" link
     Then user is redirected to "/accounts/new" page
-  	And registration page contains all fields
+    And registration page contains all fields
 
   Scenario: user registers new account
-  	Given user visits registration page
-  	When user properly fills the form
-  	And presses "Create Account" button
-  	Then user is redirected to "/accounts/new/login_with_token" page
+    Given user visits registration page
+    When user properly fills the form
+    And presses "Create Account" button
+    Then user is redirected to "/accounts/login_with_token" page
 
 #  Scenario: user enters blank login
 #  	Given user visits registration page

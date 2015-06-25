@@ -42,7 +42,7 @@ RSpec.describe "routes for Accounts", type: :routing do
 
   context "when get accounts_new_login_with_token_path " do
     let(:route) { 'accounts#login_with_token' }
-    subject { get accounts_new_login_with_token_url host: host, subdomain: subdomain }
+    subject { get accounts_login_with_token_url host: host, subdomain: subdomain }
 
     context "when subdomain missing" do
       let(:subdomain) { '' }
