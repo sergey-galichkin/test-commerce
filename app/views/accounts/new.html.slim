@@ -1,0 +1,18 @@
+= form_tag accounts_path
+
+  = label :account, :name
+  = text_field :account, :name
+
+  = label :account, :subdomain
+  = text_field :account,:subdomain
+
+  = label :account, :email
+  = email_field :account, :email
+
+  = label :account, :password
+  = password_field :account, :password
+
+  = label :account, :confirm_password
+  = password_field :account, :confirm_password
+
+  = submit_tag 'Create Account'
