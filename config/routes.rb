@@ -6,10 +6,14 @@ Rails.application.routes.draw do
   # You can have the root of your site routed with "root"
   root 'home#index'
 
-  resources :accounts, only: [:new, :create] do
-    constraints subdomain: /.+/ do
-      get 'login_with_token', on: :new
-    end
+  # Put here routes to domain-resource only
+  constraints subdomain: /^$/ do
+    resources :accounts, only: [:new, :create]
+  end
+
+  # Put here routes to tenant-resource only
+  constraints subdomain: /.+/ do
+    get 'accounts/new/login_with_token' => 'accounts#login_with_token'
   end
 
   # Example of regular route:

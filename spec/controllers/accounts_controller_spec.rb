@@ -95,7 +95,7 @@ RSpec.describe AccountsController, type: :controller do
 
         it do
           params = { email: email, token: Account.last.registration_token }
-          is_expected.to redirect_to(login_with_token_new_account_url subdomain: subdomain, params: params)
+          is_expected.to redirect_to(accounts_new_login_with_token_url subdomain: subdomain, params: params)
         end
       end
     end
