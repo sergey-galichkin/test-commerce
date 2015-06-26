@@ -3,8 +3,8 @@ source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.1'
-# Use sqlite3 as the database for Active Record
-gem 'sqlite3'
+# Use postgres as the database for Active Record
+gem 'pg', '~> 0.18.2'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -15,11 +15,12 @@ gem 'coffee-rails', '~> 4.1.0'
 # gem 'therubyracer', platforms: :ruby
 
 # Use apartment for multi-tenant databases
-#gem 'apartment'
+gem 'apartment', '~> 1.0.1'
+
 #bootstrap CSS
 #gem 'bootstrap-sass'
 # Devise is a flexible authentication solution for Rails based on Warden
-#gem 'devise'
+gem 'devise', '~> 3.5.1'
 
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
@@ -54,6 +55,7 @@ end
 
 group :test do
   gem 'cucumber-rails', '~> 1.4.2', require: false
+  gem 'capybara', '~> 2.4.4'
   gem 'database_cleaner', '~> 1.4.1'
   gem 'rspec-rails', '~> 3.2.3'
   gem 'rspec-its', '~> 1.2.0'
@@ -62,5 +64,4 @@ group :test do
   gem 'factory_girl_rails', '~> 4.0'
   gem 'shoulda-matchers', '~> 2.8.0'
   gem 'faker', '~> 1.4.3'
-  #gem 'capybara', '~> 2.4.4'
 end

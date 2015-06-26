@@ -1,12 +1,23 @@
 Rails.application.routes.draw do
+  devise_for :users
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
   root 'home#index'
 
-  resources :themes, only: [:index, :new]
-  get 'themes/create_completed' => "themes#create_completed" #redirect from AWS
+  # Put here routes to domain-resource only
+  constraints ->(request) { request.subdomain.blank? } do
+    resources :accounts, only: [:new, :create]
+  end
+
+  # Put here routes to tenant-resource only
+  constraints ->(request) { request.subdomain.present? } do
+    get 'accounts/login_with_token' => 'accounts#login_with_token'
+
+    resources :themes, only: [:index, :new]
+    get 'themes/create_completed' => "themes#create_completed" #redirect from AWS
+  end
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
