@@ -33,6 +33,6 @@ RSpec.describe ThemeUpload do
 
     its(:encoded_policy) { is_expected.to eq Base64.encode64(subject.policy.to_json).gsub("\n","")}
 
-    its(:encoded_signature) { is_expected.to eq Base64.encode64(OpenSSL::HMAC.digest(OpenSSL::Digest::Digest.new('sha1'), Rails.configuration.aws_secret_key, subject.encoded_policy)).gsub("\n","")}
+    its(:encoded_signature) { is_expected.to eq Base64.encode64(OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.configuration.aws_secret_key, subject.encoded_policy)).gsub("\n","")}
   end
 end
