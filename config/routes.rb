@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   root 'home#index'
 
   resources :themes, only: [:index, :new]
+  get 'themes/create_completed' => "themes#create_completed" #redirect from AWS
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
