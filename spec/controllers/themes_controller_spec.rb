@@ -22,7 +22,6 @@ RSpec.describe ThemesController, type: :controller do
       
       it "creates Theme in DB" do
         subject
-        puts "RSPEC THEMES: #{Theme.all[0]}"
         expect(Theme.find_by_name(theme_name)).to be_a Theme
       end
       it { is_expected.to redirect_to action: :index }
