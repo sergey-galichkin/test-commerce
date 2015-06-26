@@ -54,7 +54,7 @@ RSpec.describe AccountsController, type: :controller do
   end
 
   context "when AccountOwner role exists" do
-    before(:each) { create(:account_owner) }
+    before(:each) { create(:account_owner_role) }
 
     context "when subdomain already exists" do
       before(:each) { create(:account, subdomain: subdomain) }
@@ -129,7 +129,7 @@ RSpec.describe AccountsController, type: :controller do
         expect(account.reload.registration_token).to be_nil
       end
 
-      it "logins user" do
+      it "logs in user" do
         expect(controller).to be_user_signed_in
       end
 

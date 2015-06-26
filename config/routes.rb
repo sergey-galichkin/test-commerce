@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  devise_for :users
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -14,6 +13,8 @@ Rails.application.routes.draw do
   # Put here routes to tenant-resource only
   constraints ->(request) { request.subdomain.present? } do
     get 'accounts/login_with_token' => 'accounts#login_with_token'
+    devise_for :users, skip: :registrations
+    resources :users, only: [:index, :new, :create]
   end
 
   # Example of regular route:

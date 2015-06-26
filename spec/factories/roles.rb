@@ -5,7 +5,7 @@ FactoryGirl.define do
     name { Faker::Name.title }
   end
 
-  factory :account_owner, class: Role do
+  factory :account_owner_role, class: Role do
     name 'AccountOwner'
   end
 end
