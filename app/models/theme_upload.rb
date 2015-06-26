@@ -13,6 +13,6 @@ class ThemeUpload
                           [:eq, :$success_action_redirect, redirect_url]]
     @policy = { conditions: @policy_conditions, expiration: (Time.now + 10*60*60).utc.iso8601 }
     @encoded_policy = Base64.encode64(@policy.to_json).gsub("\n","")
-    @encoded_signature = Base64.encode64(OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.configuration.aws_secret_key, @encoded_policy)).gsub("\n","")
+    @encoded_signature = Base64.encode64(OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.configuration.aws_secret_access_key, @encoded_policy)).gsub("\n","")
   end
 end

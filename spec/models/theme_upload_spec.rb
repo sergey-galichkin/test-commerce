@@ -11,7 +11,7 @@ RSpec.describe ThemeUpload do
     end
 
     describe "AWS secret key" do
-      it { expect(Rails.configuration.aws_secret_key).to be_a String }
+      it { expect(Rails.configuration.aws_secret_access_key).to be_a String }
     end
   end
 
@@ -35,6 +35,6 @@ RSpec.describe ThemeUpload do
 
     its(:encoded_policy) { is_expected.to eq Base64.encode64(subject.policy.to_json).gsub("\n","")}
 
-    its(:encoded_signature) { is_expected.to eq Base64.encode64(OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.configuration.aws_secret_key, subject.encoded_policy)).gsub("\n","")}
+    its(:encoded_signature) { is_expected.to eq Base64.encode64(OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.configuration.aws_secret_access_key, subject.encoded_policy)).gsub("\n","")}
   end
 end
