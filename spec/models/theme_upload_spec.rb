@@ -1,3 +1,5 @@
+require 'rails_helper'
+
 RSpec.describe ThemeUpload do
   let(:url){ Faker::Internet.url }
   let(:bucket_name){ :bucket_name }

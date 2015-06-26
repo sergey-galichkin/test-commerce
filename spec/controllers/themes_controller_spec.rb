@@ -1,3 +1,5 @@
+require 'rails_helper'
+
 RSpec.describe ThemesController, type: :controller do
   describe "GET #index" do
     subject { get :index }
@@ -12,12 +14,12 @@ RSpec.describe ThemesController, type: :controller do
   end
 
   describe "GET #create_completed (redirect from AWS)" do
+    let(:theme_name) { "#{Faker::Lorem.sentence}zip" }
+    let(:key) { "_#{theme_name}" }
+
+    before (:all) { ThemeStatus.create! name: :Processing }
+
     context "with valid parameters" do
-      before (:all) { ThemeStatus.create! name: :Processing }
-      
-      let(:theme_name) { "#{Faker::Lorem.sentence}zip" }
-      let(:key) { "_#{theme_name}" }
-      
       subject { get :create_completed, key: key }
       
       it "creates Theme in DB" do
