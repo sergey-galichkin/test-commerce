@@ -1,48 +1,38 @@
-RSpec.shared_examples "adding first policy condition" do
-  its(:policy_conditions) { is_expected.to include [:condition, :param_1, :param_2] }
-end
+RSpec.describe ThemeUpload do
+  let(:url){ Faker::Internet.url }
+  let(:bucket_name){ :bucket_name }
+  subject { ThemeUpload.new bucket_name, url }
 
-RSpec.describe ThemeUpload, type: :model do
   context "has required configuration settings" do
     describe "max size of theme zip file" do
       it { expect(Rails.configuration.max_theme_zip_file_length).to be_between(1, 5*1024*1024*1024-1).inclusive }
     end
-  end
 
-  context "when initialized" do
-    its(:policy_conditions) { is_expected.to eq []}
-  end
-
-  context "when adding policy condition" do
-    before(:each) { subject.add_policy_condition :condition, :param_1, :param_2 }
-
-    it_behaves_like "adding first policy condition"
-
-    context "and adding second policy condition" do
-      before(:each) { subject.add_policy_condition :another_condition, :another_param_1, :another_param_2 }
-      it_behaves_like "adding first policy condition"
-      its(:policy_conditions) { is_expected.to include [:another_condition, :another_param_1, :another_param_2] }
+    describe "AWS secret key" do
+      it { expect(Rails.configuration.aws_secret_key).to be_a String }
     end
   end
 
-  context "when adding bucket policy condition" do
-    its(:policy_conditions) { expect(subject.add_bucket_policy_condition :bucket_name).to include [:eq, :$bucket, :bucket_name] }
-  end
+  context "when constructing policy" do
+    let(:utc_now){ (Time.now + 10*60*60).utc.iso8601 }
+    let(:utc_next_minute){ (Time.now + 10*60*60 + 60).utc.iso8601 }
 
-  context "when adding acl policy condition" do
-    its(:policy_conditions) { expect(subject.add_acl_policy_condition).to include [:eq, :$acl, :private] }
-  end
+    its(:policy) { is_expected.to be_a(Hash)}
 
-  context "when adding content length policy condition" do
-    its(:policy_conditions) { expect(subject.add_content_length_policy_condition).to include [:"content-length-range", 1, Rails.configuration.max_theme_zip_file_length] }
-  end
+    describe "policy expiration" do
+      it { expect(subject.policy[:expiration]).to be_between utc_now, utc_next_minute }
+    end
 
-  context "when adding key policy condition" do
-    its(:policy_conditions) { expect(subject.add_key_policy_condition).to include [:"starts-with", :$key, ThemeUpload::UPLOADS_FOLDER_NAME + "/"] }
-  end
+    its(:policy) { is_expected.to include(conditions: subject.policy_conditions)}
+    its(:policy_conditions) { is_expected.to be_an Array}
+    its(:policy_conditions) { is_expected.to include [:eq, :$bucket, :bucket_name] }
+    its(:policy_conditions) { is_expected.to include [:eq, :$acl, :private] }
+    its(:policy_conditions) { is_expected.to include [:"content-length-range", 1, Rails.configuration.max_theme_zip_file_length] }
+    its(:policy_conditions) { is_expected.to include [:"starts-with", :$key, ThemeUpload::UPLOADS_FOLDER_NAME + "/"] }
+    its(:policy_conditions) { is_expected.to include [:eq, :$success_action_redirect, url] }
 
-  context "when adding redirect policy condition" do
-    let(:url){ Faker::Internet.url }
-    its(:policy_conditions) { expect(subject.add_redirect_policy_condition url).to include [:eq, :$success_action_redirect, url] }
+    its(:encoded_policy) { is_expected.to eq Base64.encode64(subject.policy.to_json).gsub("\n","")}
+
+    its(:encoded_signature) { is_expected.to eq Base64.encode64(OpenSSL::HMAC.digest(OpenSSL::Digest::Digest.new('sha1'), Rails.configuration.aws_secret_key, subject.encoded_policy)).gsub("\n","")}
   end
 end
