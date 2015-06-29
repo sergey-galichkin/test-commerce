@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 RSpec.shared_examples "when user could not be created" do
-  let!(:user_count) { User.count }
 
   it { is_expected.to have_http_status(:ok) }
 
