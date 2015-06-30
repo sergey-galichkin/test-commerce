@@ -1,0 +1,16 @@
+= link_to "Create New", new_user_path
+
+table
+  thead
+    tr
+      th Email
+      th Role
+      th Actions
+  tbody
+    - @users.each do |user|
+      tr
+        td = user.email
+        td = user.role.name
+        td
+          = link_to "Edit", edit_user_path(user)
+          = link_to 'Delete', user_path(user), method: :delete

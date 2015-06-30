@@ -3,6 +3,7 @@ class UsersController < ApplicationController
 
   # GET#index
   def index
+    @users = User.all
   end
 
   # GET#new

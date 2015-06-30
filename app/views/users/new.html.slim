@@ -1,0 +1,11 @@
+= form_for(User.new) do |f|
+  .field
+    = f.label :email
+    = f.email_field :email
+  .field
+    = f.label :password
+    = f.password_field :password
+  .field
+    = f.label :confirm_password
+    = f.password_field :confirm_password
+  .actions = f.submit "Create"

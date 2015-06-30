@@ -2,6 +2,8 @@ Feature: account_management.register_account
 Registering new account
 User info, used for registrartion - email(login), password, password re-type, subdomain name, display name
 
+Background:
+    Given all accounts are cleaned
 
   Scenario: user opens new account registration form
     Given user visits start page
