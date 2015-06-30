@@ -17,13 +17,13 @@ RSpec.describe ThemesController, type: :controller do
     let(:theme_name) { "#{Faker::Lorem.sentence}zip" }
     let(:key) { "_#{theme_name}" }
 
-    before (:all) { ThemeStatus.create! name: :Processing }
+    before (:all) { create :processing_theme_status }
 
     context "with valid parameters" do
-      subject { get :create_completed, key: key }
+      before(:each) { get :create_completed, key: key }
+      subject { response }
       
       it "creates Theme in DB" do
-        subject
         expect(Theme.find_by_name(theme_name)).to be_a Theme
       end
       it { is_expected.to redirect_to action: :index }
