@@ -13,6 +13,6 @@ RSpec.describe Theme, type: :model do
     it {is_expected.to have_db_column(:zip_file_url).with_options limit: Theme::ZIP_FILE_URL_LIMIT, null: false }
 
     it {is_expected.to validate_presence_of :status}
-    it {is_expected.to have_db_column(:status).with_options null: false, default: 0}
+    it {is_expected.to have_db_column(:status).with_options null: false, default: Theme.statuses[:processing]}
   end
 end
