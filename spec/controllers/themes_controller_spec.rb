@@ -14,19 +14,22 @@ RSpec.describe ThemesController, type: :controller do
   end
 
   describe "GET #create_completed (redirect from AWS)" do
-    let(:theme_name) { "#{Faker::Lorem.sentence}zip" }
-    let(:key) { "_#{theme_name}" }
-
     before (:all) { create :processing_theme_status }
 
     context "with valid parameters" do
-      before(:each) { get :create_completed, key: key }
-      subject { response }
-      
-      it "creates Theme in DB" do
-        expect(Theme.find_by_name(theme_name)).to be_a Theme
-      end
+      let(:theme_name) { "#{Faker::Lorem.sentence}zip" }
+      let(:key) { "_#{theme_name}" }
+      subject { get :create_completed, key: key }
       it { is_expected.to redirect_to action: :index }
+    end
+
+    context "when parsing theme name in key" do
+      {"_qwerty" => "qwerty", "1234_qwerty" => "qwerty", "12345_67890_qwerty" => "67890_qwerty"}.each do |key, theme_name|
+        it "creates Theme in DB when key is #{key}" do
+          get :create_completed, key: key
+          expect(Theme.find_by_name(theme_name)).to be_a Theme
+        end
+      end
     end
   end
 end
