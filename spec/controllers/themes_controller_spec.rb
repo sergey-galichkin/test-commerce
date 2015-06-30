@@ -1,5 +1,16 @@
 require 'rails_helper'
 
+RSpec.shared_examples "creating Theme in DB" do |key, theme_name|
+  before(:each) { get :create_completed, key: key }
+  subject(:theme) { Theme.find_by_name theme_name }
+  #let(:processing_theme_status) { ThemeStatus.find_by_name :Processing }
+  describe "Theme with name #{theme_name}" do
+    it { is_expected.to be }
+  end
+  its(:zip_file_url) { is_expected.to eq key }
+  its(:theme_status) { is_expected.to eq processing_theme_status }
+end
+
 RSpec.describe ThemesController, type: :controller do
   describe "GET #index" do
     subject { get :index }
@@ -14,7 +25,8 @@ RSpec.describe ThemesController, type: :controller do
   end
 
   describe "GET #create_completed (redirect from AWS)" do
-    before (:all) { create :processing_theme_status }
+    before (:all) { @processing_theme_status = create :processing_theme_status }
+    let (:processing_theme_status) { @processing_theme_status }
 
     context "with valid parameters" do
       let(:theme_name) { "#{Faker::Lorem.sentence}zip" }
@@ -23,12 +35,9 @@ RSpec.describe ThemesController, type: :controller do
       it { is_expected.to redirect_to action: :index }
     end
 
-    context "when parsing theme name in key" do
-      {"_qwerty" => "qwerty", "1234_qwerty" => "qwerty", "12345_67890_qwerty" => "67890_qwerty"}.each do |key, theme_name|
-        it "creates Theme in DB when key is #{key}" do
-          get :create_completed, key: key
-          expect(Theme.find_by_name(theme_name)).to be_a Theme
-        end
+    {"_qwerty" => "qwerty", "1234_qwerty" => "qwerty", "12345_67890_qwerty" => "67890_qwerty"}.each do |key, theme_name|
+      describe "when parsing key: #{key}" do
+        it_behaves_like "creating Theme in DB", key, theme_name
       end
     end
   end
