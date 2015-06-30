@@ -12,8 +12,7 @@ RSpec.describe Theme, type: :model do
     it {is_expected.to validate_length_of(:zip_file_url).is_at_most Theme::ZIP_FILE_URL_LIMIT }
     it {is_expected.to have_db_column(:zip_file_url).with_options limit: Theme::ZIP_FILE_URL_LIMIT, null: false }
 
-    it {is_expected.to belong_to :theme_status}
-    it {is_expected.to validate_presence_of :theme_status}
-    it {is_expected.to have_db_column(:theme_status_id).with_options null: false}
+    it {is_expected.to validate_presence_of :status}
+    it {is_expected.to have_db_column(:status).with_options null: false, default: 0}
   end
 end

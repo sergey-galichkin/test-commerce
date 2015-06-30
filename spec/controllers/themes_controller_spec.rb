@@ -3,12 +3,11 @@ require 'rails_helper'
 RSpec.shared_examples "creating Theme in DB" do |key, theme_name|
   before(:each) { get :create_completed, key: key }
   subject(:theme) { Theme.find_by_name theme_name }
-  #let(:processing_theme_status) { ThemeStatus.find_by_name :Processing }
   describe "Theme with name #{theme_name}" do
     it { is_expected.to be }
+    its(:zip_file_url) { is_expected.to eq key }
+    it { is_expected.to be_processing }
   end
-  its(:zip_file_url) { is_expected.to eq key }
-  its(:theme_status) { is_expected.to eq processing_theme_status }
 end
 
 RSpec.describe ThemesController, type: :controller do
@@ -25,9 +24,6 @@ RSpec.describe ThemesController, type: :controller do
   end
 
   describe "GET #create_completed (redirect from AWS)" do
-    before (:all) { @processing_theme_status = create :processing_theme_status }
-    let (:processing_theme_status) { @processing_theme_status }
-
     context "with valid parameters" do
       let(:theme_name) { "#{Faker::Lorem.sentence}zip" }
       let(:key) { "_#{theme_name}" }

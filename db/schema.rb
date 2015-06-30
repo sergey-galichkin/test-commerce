@@ -34,6 +34,12 @@ ActiveRecord::Schema.define(version: 20150624130545) do
 
   add_index "roles", ["name"], name: "index_roles_on_name", unique: true, using: :btree
 
+  create_table "themes", force: :cascade do |t|
+    t.string  "name",         limit: 100,              null: false
+    t.string  "zip_file_url", limit: 2000,             null: false
+    t.integer "status",                    default: 0, null: false
+  end
+
   create_table "users", force: :cascade do |t|
     t.string   "email",                  default: "", null: false
     t.string   "encrypted_password",     default: "", null: false
@@ -53,15 +59,5 @@ ActiveRecord::Schema.define(version: 20150624130545) do
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
   add_index "users", ["role_id"], name: "index_users_on_role_id", using: :btree
-
-  create_table "theme_statuses", force: :cascade do |t|
-    t.string "name", limit: 20, null: false
-  end
-
-  create_table "themes", force: :cascade do |t|
-    t.string  "name",            limit: 100,  null: false
-    t.string  "zip_file_url",    limit: 2000, null: false
-    t.integer "theme_status_id",              null: false
-  end
 
 end
