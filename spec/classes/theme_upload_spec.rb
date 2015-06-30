@@ -7,7 +7,7 @@ RSpec.describe ThemeUpload do
 
   context "has required configuration settings" do
     describe "max size of theme zip file" do
-      it { expect(Rails.configuration.max_theme_zip_file_length).to be_between(1, 5*1024*1024*1024-1).inclusive }
+      it { expect(Rails.configuration.max_theme_zip_file_length).to be_between(1, 5.gigabytes - 1).inclusive }
     end
 
     describe "AWS secret key" do
@@ -16,8 +16,8 @@ RSpec.describe ThemeUpload do
   end
 
   context "when constructing policy" do
-    let(:utc_now){ (Time.now + 10*60*60).utc.iso8601 }
-    let(:utc_next_minute){ (Time.now + 10*60*60 + 60).utc.iso8601 }
+    let(:utc_now){ (Time.now + 10.hours).utc.iso8601 }
+    let(:utc_next_minute){ (Time.now + 10.hours + 1.minute).utc.iso8601 }
 
     its(:policy) { is_expected.to be_a(Hash)}
 
@@ -33,8 +33,8 @@ RSpec.describe ThemeUpload do
     its(:policy_conditions) { is_expected.to include [:"starts-with", :$key, ThemeUpload::UPLOADS_FOLDER_NAME + "/"] }
     its(:policy_conditions) { is_expected.to include [:eq, :$success_action_redirect, url] }
 
-    its(:encoded_policy) { is_expected.to eq Base64.encode64(subject.policy.to_json).gsub("\n","")}
+    its(:encoded_policy) { is_expected.to eq Base64.strict_encode64(subject.policy.to_json) }
 
-    its(:encoded_signature) { is_expected.to eq Base64.encode64(OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.configuration.aws_secret_access_key, subject.encoded_policy)).gsub("\n","")}
+    its(:encoded_signature) { is_expected.to eq Base64.strict_encode64(OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.configuration.aws_secret_access_key, subject.encoded_policy))}
   end
 end

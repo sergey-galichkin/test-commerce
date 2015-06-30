@@ -40,6 +40,6 @@ Rails.application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
-  Rails.configuration.max_theme_zip_file_length = 1000000000
+  Rails.configuration.max_theme_zip_file_length = 1.gigabyte
   Rails.configuration.aws_secret_access_key = "xbnXDiIvtqVAmoaFT5yYZWu4Wye/l+CvQt6Cp2bm"
 end
