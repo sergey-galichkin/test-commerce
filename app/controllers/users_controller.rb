@@ -8,6 +8,7 @@ class UsersController < ApplicationController
 
   # GET#new
   def new
+    @user = User.new
   end
 
   # POST#create
