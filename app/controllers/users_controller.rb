@@ -22,7 +22,7 @@ class UsersController < ApplicationController
 
   # GET#edit
   def edit
-    User.find params[:id]
+    @user = User.find params[:id]
   end
 
   # PUT#update
