@@ -1,5 +1,4 @@
 Given(/^user visits registration page$/) do
-  FactoryGirl.create(:account_owner_role) # TODO :should it be in db/seed?
   visit new_account_path
 end
 
