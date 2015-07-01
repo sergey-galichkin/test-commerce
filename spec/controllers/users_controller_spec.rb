@@ -28,7 +28,7 @@ RSpec.describe UsersController, type: :controller do
       describe "#{method}##{action}" do
         let(:param) { {id: account_owner.id} }
         before(:each) do
-          if( action == :edit || action == :update || action == :destroy)
+          if [:edit, :update, :destroy].include? action
             send(method, action, param)
           else
             send(method, action)
@@ -44,12 +44,13 @@ RSpec.describe UsersController, type: :controller do
 
   describe "when user logged in" do
     let!(:user_count) { User.count }
+    let(:params) { {} }
     subject { response }
 
     %w{index new edit}.each do |action|
       describe "GET##{action}" do
-        let(:param) { {id: account_owner.id} }
-        before(:each) { (action == 'edit')? (get action, param) : (get action) }
+        let(:params) { {id: account_owner.id} } if action == 'edit'
+        before(:each) { get action, params }
 
         it { is_expected.to have_http_status(:ok) }
 
@@ -120,7 +121,7 @@ RSpec.describe UsersController, type: :controller do
         let(:user_params) { params }
         before(:each) { put :update, id: user_id, user: user_params }
         it "updates User role" do
-          expect(User.find(id).role_id).to eq(role.id)
+          expect(User.find(id).role).to eq role
         end
         it "updates User password" do
           expect(User.find(id).encrypted_password).not_to eq(origin_password)
