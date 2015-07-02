@@ -26,7 +26,7 @@ class UsersController < ApplicationController
     @user = User.find params[:id]
   end
 
-  # PUT#update
+  # PUT/PATCH#update
   def update
     user = User.find params[:id]
     params[:user].delete(:password) if params[:user][:password].blank?
@@ -43,6 +43,22 @@ class UsersController < ApplicationController
     redirect_to users_path
   end
 
+  # GET#edit_password
+  def edit_password
+  end
+
+  # PATCH#update_password
+  def update_password
+    return render :edit_password if params[:user].blank?
+
+    if current_user.update update_password_params
+      sign_in current_user, :bypass => true
+      redirect_to root_path
+    else
+      render :edit_password
+    end
+  end
+
   private
 
   def create_params
@@ -51,5 +67,9 @@ class UsersController < ApplicationController
 
   def update_params
     params.required(:user).permit(:role_id, :password)
+  end
+
+  def update_password_params
+    params.required(:user).permit(:password)
   end
 end

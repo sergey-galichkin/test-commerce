@@ -14,7 +14,12 @@ Rails.application.routes.draw do
   constraints ->(request) { request.subdomain.present? } do
     get 'accounts/login_with_token' => 'accounts#login_with_token'
     devise_for :users, skip: :registrations
-    resources :users, except: :show
+    resources :users, except: :show do
+      collection do
+        get 'edit_password'
+        patch 'update_password'
+      end
+    end
   end
 
   # Example of regular route:
