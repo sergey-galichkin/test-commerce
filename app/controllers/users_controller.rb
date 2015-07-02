@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
   before_action :authenticate_user!
+  before_action :set_user, only: [:edit, :update, :destroy]
 
   # GET#index
   def index
@@ -13,8 +14,8 @@ class UsersController < ApplicationController
 
   # POST#create
   def create
-    user = User.new create_params
-    if user.save
+    @user = User.new user_params
+    if @user.save
       redirect_to users_path
     else
       render :new
@@ -23,14 +24,11 @@ class UsersController < ApplicationController
 
   # GET#edit
   def edit
-    @user = User.find params[:id]
   end
 
   # PUT/PATCH#update
   def update
-    user = User.find params[:id]
-    params[:user].delete(:password) if params[:user][:password].blank?
-    if user.update(update_params)
+    if @user.update user_params
       redirect_to users_path
     else
       render :edit
@@ -39,7 +37,7 @@ class UsersController < ApplicationController
 
   # DELETE#destroy
   def destroy
-    User.find(params[:id]).destroy unless params[:id].to_i == current_user.id
+    @user.destroy unless @user == current_user
     redirect_to users_path
   end
 
@@ -51,7 +49,7 @@ class UsersController < ApplicationController
   def update_password
     return render :edit_password if params[:user].blank?
 
-    if current_user.update update_password_params
+    if current_user.update user_params
       sign_in current_user, :bypass => true
       redirect_to root_path
     else
@@ -61,15 +59,18 @@ class UsersController < ApplicationController
 
   private
 
-  def create_params
-    params.required(:user).permit(:email, :role_id, :password)
+  def set_user
+    @user = User.find(params[:id])
   end
 
-  def update_params
-    params.required(:user).permit(:role_id, :password)
-  end
-
-  def update_password_params
-    params.required(:user).permit(:password)
+  def user_params
+    params.required(:user).permit case params[:action]
+    when 'update'
+      [:role_id] << (params[:user][:password].present? && :password)
+    when 'create'
+      [:password, :role_id, :email]
+    else
+      [:password]
+    end
   end
 end
