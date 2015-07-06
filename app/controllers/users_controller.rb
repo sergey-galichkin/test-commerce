@@ -30,7 +30,7 @@ class UsersController < ApplicationController
   def update
     if @user.update user_params
       sign_in(current_user, bypass: true) if user_params[:password].present? && @user == current_user
-      redirect_to users_path
+      redirect_to :back
     else
       render :edit
     end
@@ -68,11 +68,17 @@ class UsersController < ApplicationController
   def user_params
     params.required(:user).permit case params[:action]
     when 'update'
-      [:role_id] << (params[:user][:password].present? && :password)
+      par = Array.new
+      if @user == current_user && current_user.role.name != 'AccountOwner'
+        par << :password
+      else
+        par << (params[:user][:password].present? && :password)
+      end
+      par << (params[:user][:role_id].present? && :role_id)
     when 'create'
       [:password, :role_id, :email]
     else
-      [:password]
+      []
     end
   end
 end

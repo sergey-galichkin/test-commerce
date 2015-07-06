@@ -11,6 +11,22 @@ RSpec.shared_examples "when user could not be created or updated" do
   end
 end
 
+RSpec.shared_examples "when logged in user updates password" do
+  it "updates User password" do
+    expect(User.find(id).encrypted_password).not_to eq(origin_password)
+  end
+
+  it "re-sign-ins user" do
+    expect(controller).to have_received(:sign_in).with(signed_user, bypass: true)
+  end
+
+  it "User.count not changed" do
+    expect(User.count).to eq(user_count)
+  end
+
+  it { is_expected.to redirect_to(users_path) }
+end
+
 RSpec.describe UsersController, type: :controller do
   # TODO: move to shared context
   let(:account) { create :account }
@@ -97,6 +113,7 @@ RSpec.describe UsersController, type: :controller do
       let(:template) { :edit }
       let(:id) { account_owner.id }
       let(:user_id) { id }
+      before(:each) { request.env["HTTP_REFERER"] = users_path }
 
       context "when id wrong" do
         let(:user_params) { params }
@@ -113,45 +130,60 @@ RSpec.describe UsersController, type: :controller do
         end
       end
 
-      context "when successful" do
-        let!(:origin_password) {account_owner.encrypted_password}
-        let(:user_params) { params }
-        before(:each) do
-          allow(controller).to receive(:sign_in)
-          put :update, id: user_id, user: user_params
+      context "when AccountOwner" do
+        context "when successful" do
+          let!(:origin_password) {account_owner.encrypted_password}
+          let(:user_params) { params }
+          let(:signed_user) { account_owner }
+          before(:each) do
+            allow(controller).to receive(:sign_in)
+            put :update, id: user_id, user: user_params
+          end
+
+          it_behaves_like "when logged in user updates password"
         end
 
-        it "updates User role" do
-          expect(User.find(id).role).to eq role
+        context "when password is blank" do
+          let!(:origin_password) {account_owner.encrypted_password}
+          let(:user_params) { params.merge({ password: ''}) }
+          before(:each) { put :update, id: user_id, user: user_params }
+          it "updates User role" do
+            expect(account_owner.reload.role_id).to eq(role.id)
+          end
+          it "does not update User password" do
+            expect(account_owner.reload.encrypted_password).to eq(origin_password)
+          end
+          it "User.count not changed" do
+            expect(User.count).to eq(user_count)
+          end
+          it { is_expected.to redirect_to(users_path) }
         end
-        it "updates User password" do
-          expect(User.find(id).encrypted_password).not_to eq(origin_password)
-        end
-
-        it "re-sign-ins user" do
-          expect(controller).to have_received(:sign_in).with(account_owner, bypass: true)
-        end
-
-        it "User.count not changed" do
-          expect(User.count).to eq(user_count)
-        end
-        it { is_expected.to redirect_to(users_path) }
       end
 
-      context "when password is blank" do
-        let!(:origin_password) {account_owner.encrypted_password}
-        let(:user_params) { params.merge({ password: ''}) }
-        before(:each) { put :update, id: user_id, user: user_params }
-        it "updates User role" do
-          expect(account_owner.reload.role_id).to eq(role.id)
+      context "when User" do
+        let(:some_user) { create :user}
+        let!(:origin_password) {some_user.encrypted_password}
+        let!(:user_count) { User.count }
+        let(:id) { some_user.id }
+        before(:each) do
+          sign_out account_owner
+          account_owner.destroy
+          sign_in some_user
+          allow(controller).to receive(:sign_in)
+          put :update, id: id, user: user_params
         end
-        it "does not update User password" do
-          expect(account_owner.reload.encrypted_password).to eq(origin_password)
+        context "when successful" do
+          let(:user_params) { params.reject { |key, value| key == :role_id } }
+          let(:signed_user) { some_user }
+
+          it_behaves_like "when logged in user updates password"
         end
-        it "User.count not changed" do
-          expect(User.count).to eq(user_count)
+
+        context "when password is blank" do
+          let(:user_params) { { password: ''} }
+
+          it_behaves_like "when user could not be created or updated"
         end
-        it { is_expected.to redirect_to(users_path) }
       end
     end
 
