@@ -50,7 +50,8 @@ class UsersController < ApplicationController
     return render :edit_password if params[:user].blank?
 
     if current_user.update user_params
-      sign_in current_user, :bypass => true
+      # Sign in the user by passing validation in case their password changed
+      sign_in current_user, bypass: true
       redirect_to root_path
     else
       render :edit_password

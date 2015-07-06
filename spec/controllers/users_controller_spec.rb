@@ -187,7 +187,10 @@ RSpec.describe UsersController, type: :controller do
 
     describe "PATCH#update_password" do
       let(:params) { { password: '87654321' } }
-      before(:each) { patch :update_password, user: passw_params }
+      before(:each) do
+        controller.stub(:sign_in)
+        patch :update_password, user: passw_params
+      end
 
       context "when invalid params" do
         let(:template) { :edit_password }
@@ -204,9 +207,15 @@ RSpec.describe UsersController, type: :controller do
       context "when successful" do
         let!(:origin_password) {account_owner.encrypted_password}
         let(:passw_params) { params }
+
         it "updates User password" do
           expect(account_owner.reload.encrypted_password).not_to eq(origin_password)
         end
+
+        it "re-sign-ins user" do
+          expect(controller).to have_received(:sign_in).with(account_owner, bypass: true)
+        end
+
         it "User.count not changed" do
           expect(User.count).to eq(user_count)
         end
