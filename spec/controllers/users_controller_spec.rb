@@ -41,8 +41,7 @@ RSpec.describe UsersController, type: :controller do
     subject { response }
     let(:params) { {} }
 
-    { index: :get, new: :get, create: :post, edit: :get, update: :put, destroy: :delete, \
-      edit_password: :get , update_password: :patch }.each do |action, method|
+    { index: :get, new: :get, create: :post, edit: :get, update: :put, destroy: :delete }.each do |action, method|
 
       describe "#{method}##{action}" do
         let(:params) { {id: account_owner.id} } if [:edit, :update, :destroy].include? action
@@ -60,9 +59,9 @@ RSpec.describe UsersController, type: :controller do
     let(:params) { {} }
     subject { response }
 
-    %w{index new edit edit_password}.each do |action|
+    %w{index new edit }.each do |action|
       describe "GET##{action}" do
-        let(:params) { {id: account_owner.id} } if ['edit', 'edit_password'].include? action
+        let(:params) { {id: account_owner.id} } if action == 'edit'
         before(:each) { get action, params }
 
         it { is_expected.to have_http_status(:ok) }
@@ -113,7 +112,6 @@ RSpec.describe UsersController, type: :controller do
       let(:template) { :edit }
       let(:id) { account_owner.id }
       let(:user_id) { id }
-      before(:each) { request.env["HTTP_REFERER"] = users_path }
 
       context "when id wrong" do
         let(:user_params) { params }
@@ -223,44 +221,6 @@ RSpec.describe UsersController, type: :controller do
         end
 
         it { is_expected.to redirect_to(users_path) }
-      end
-    end
-
-    describe "PATCH#update_password" do
-      let(:params) { { password: '87654321' } }
-      before(:each) do
-        allow(controller).to receive(:sign_in)
-        patch :update_password, user: passw_params
-      end
-
-      context "when invalid params" do
-        let(:template) { :edit_password }
-        context "when password missing" do
-          let(:passw_params) { params.reject { |key, value| key == :password } }
-          it_behaves_like "when user could not be created or updated"
-        end
-        context "when password wrong" do
-          let(:passw_params) { params.merge({ password: "wrong" }) }
-          it_behaves_like "when user could not be created or updated"
-        end
-      end
-
-      context "when successful" do
-        let!(:origin_password) {account_owner.encrypted_password}
-        let(:passw_params) { params }
-
-        it "updates User password" do
-          expect(account_owner.reload.encrypted_password).not_to eq(origin_password)
-        end
-
-        it "re-sign-ins user" do
-          expect(controller).to have_received(:sign_in).with(account_owner, bypass: true)
-        end
-
-        it "User.count not changed" do
-          expect(User.count).to eq(user_count)
-        end
-        it { is_expected.to redirect_to(root_path) }
       end
     end
   end

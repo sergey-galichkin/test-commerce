@@ -30,7 +30,7 @@ class UsersController < ApplicationController
   def update
     if @user.update user_params
       sign_in(current_user, bypass: true) if user_params[:password].present? && @user == current_user
-      redirect_to :back
+      redirect_to users_path
     else
       render :edit
     end
@@ -40,23 +40,6 @@ class UsersController < ApplicationController
   def destroy
     @user.destroy unless @user == current_user
     redirect_to users_path
-  end
-
-  # GET#edit_password
-  def edit_password
-  end
-
-  # PATCH#update_password
-  def update_password
-    return render :edit_password if params[:user].blank?
-
-    if current_user.update user_params
-      # Sign in the user by passing validation in case their password changed
-      sign_in current_user, bypass: true
-      redirect_to root_path
-    else
-      render :edit_password
-    end
   end
 
   private
