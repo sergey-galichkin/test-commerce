@@ -91,13 +91,17 @@ Then(/^user management page shows user$/) do
   expect(all('tr td')[1]).to have_text 'AccountOwner'
 end
 
+def fill_account_owner_email_and_password
+  fill_in('Email', with: 'test@mail.com')
+  fill_in('Password', with: '12345678')
+end
+
 private
 
 def fill_and_submit_register_account_form
   fill_in('Name', with: 'Test Account')
   fill_in('Subdomain', with: 'testsubdomain')
-  fill_in('Email', with: 'test@mail.com')
-  fill_in('Password', with: '12345678')
+  fill_account_owner_email_and_password
   fill_in('Confirm password', with: '12345678')
   click_button('Create Account')
 end

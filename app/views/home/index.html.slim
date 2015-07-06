@@ -1,1 +1,8 @@
-= link_to 'Registration', new_account_path
+- if request.subdomain.blank?
+  = link_to 'Registration', new_account_path
+- else
+  - if user_signed_in?
+    = link_to 'LogOff', destroy_user_session_path, method: :delete
+    = link_to 'Change Password', edit_user_path(current_user)
+  - else
+    = link_to 'Login', new_user_session_path

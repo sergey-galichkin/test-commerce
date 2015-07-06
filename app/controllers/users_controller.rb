@@ -29,7 +29,7 @@ class UsersController < ApplicationController
   # PUT/PATCH#update
   def update
     if @user.update user_params
-      sign_in(current_user, bypass: true) if user_params[:password].present? && @user == current_user
+      sign_in(@user, bypass: true) if user_params[:password].present? && @user == current_user
       redirect_to users_path
     else
       render :edit
@@ -51,7 +51,7 @@ class UsersController < ApplicationController
   def user_params
     params.required(:user).permit case params[:action]
     when 'update'
-      par = Array.new
+      par = []
       if @user == current_user && current_user.role.name != 'AccountOwner'
         par << :password
       else
