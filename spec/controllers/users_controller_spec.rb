@@ -116,13 +116,22 @@ RSpec.describe UsersController, type: :controller do
       context "when successful" do
         let!(:origin_password) {account_owner.encrypted_password}
         let(:user_params) { params }
-        before(:each) { put :update, id: user_id, user: user_params }
+        before(:each) do
+          allow(controller).to receive(:sign_in)
+          put :update, id: user_id, user: user_params
+        end
+
         it "updates User role" do
           expect(User.find(id).role).to eq role
         end
         it "updates User password" do
           expect(User.find(id).encrypted_password).not_to eq(origin_password)
         end
+
+        it "re-sign-ins user" do
+          expect(controller).to have_received(:sign_in).with(account_owner, bypass: true)
+        end
+
         it "User.count not changed" do
           expect(User.count).to eq(user_count)
         end
@@ -188,7 +197,7 @@ RSpec.describe UsersController, type: :controller do
     describe "PATCH#update_password" do
       let(:params) { { password: '87654321' } }
       before(:each) do
-        controller.stub(:sign_in)
+        allow(controller).to receive(:sign_in)
         patch :update_password, user: passw_params
       end
 
