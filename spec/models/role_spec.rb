@@ -8,9 +8,8 @@ RSpec.describe Role, type: :model do
     it {expect(build(:role)).to validate_uniqueness_of(:name)}
     it {is_expected.to have_db_column(:name).with_options null: false, limit: Role::NAME_LIMIT_MAX }
 
-    it {is_expected.to have_db_column(:can_create_users).with_options null: false, default: false }
-    it {is_expected.to have_db_column(:can_update_users_password).with_options null: false, default: false }
-    it {is_expected.to have_db_column(:can_update_users_role).with_options null: false, default: false }
-    it {is_expected.to have_db_column(:can_delete_users).with_options null: false, default: false }
+    %w{ can_create_users can_update_users_password can_update_users_role can_delete_users }.each do |column_name|
+        it {is_expected.to have_db_column(column_name).with_options null: false, default: false }
+    end
   end
 end
