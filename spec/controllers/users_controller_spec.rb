@@ -138,6 +138,10 @@ RSpec.describe UsersController, type: :controller do
             put :update, id: user_id, user: user_params
           end
 
+          it "updates User role" do
+            expect(User.find(id).role).to eq role
+          end
+
           it_behaves_like "when logged in user updates password"
         end
 
@@ -146,10 +150,10 @@ RSpec.describe UsersController, type: :controller do
           let(:user_params) { params.merge({ password: ''}) }
           before(:each) { put :update, id: user_id, user: user_params }
           it "updates User role" do
-            expect(account_owner.reload.role_id).to eq(role.id)
+            expect(User.find(id).role).to eq role
           end
           it "does not update User password" do
-            expect(account_owner.reload.encrypted_password).to eq(origin_password)
+            expect(User.find(id).encrypted_password).to eq(origin_password)
           end
           it "User.count not changed" do
             expect(User.count).to eq(user_count)
