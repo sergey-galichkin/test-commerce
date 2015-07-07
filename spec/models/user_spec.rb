@@ -13,6 +13,6 @@ RSpec.describe User, type: :model do
 
     it {is_expected.to belong_to(:role)}
 
-    it {expect(subject.column_for_attribute(:role_id).null).to be_falsey}
+    it {is_expected.to have_db_column(:role_id).with_options null: false}
   end
 end
