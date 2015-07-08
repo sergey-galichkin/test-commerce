@@ -13,9 +13,11 @@ class AccountsController < ApplicationController
       Apartment::Tenant.switch!(account.subdomain)
 
       user = User.new user_params
-      user.role = Role.find_by_name 'AccountOwner'
-      user.save!
 
+      user.role = Role.find_by role_params
+      user.role = Role.create! role_params.merge({ name:'AccountOwner'}) if user.role.nil?
+
+      user.save!
       redirect_to url_for(action: :login_with_token, subdomain: account.subdomain, token: account.registration_token, email: user.email)
     rescue
       account.destroy
@@ -46,6 +48,10 @@ class AccountsController < ApplicationController
 
   def user_params
     params.require(:account).permit(:email, :password)
+  end
+
+  def role_params
+    { can_create_users: true, can_update_users_password: true, can_update_users_role: true, can_delete_users: true }
   end
 
   def handle_wrong_login_params
