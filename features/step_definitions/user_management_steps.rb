@@ -13,6 +13,14 @@ Given(/^AccountOwner visits user management page$/) do
   visit users_path
 end
 
+Given(/^User with "(.*?)" permission visits user management page$/) do |arg1|
+  create_user_with_permission arg1
+
+  login_new_user
+
+  visit users_path
+end
+
 Then(/^user management page contains all fields$/) do
   expect(page).to have_link('Create New', href: new_user_path)
   expect(page).to have_table ''
@@ -58,9 +66,9 @@ Then(/^user management page shows new user$/) do
   expect(all('tr td')[5]).to have_link('Delete', href: user_path(2))
 end
 
-Given(/^creates new user$/) do
+Given(/^creates new user with role "(.*?)"$/) do |arg1|
   visit new_user_path
-  fill_new_user_form
+  fill_new_user_form arg1
   click_button('Create User')
 end
 
@@ -106,11 +114,16 @@ def fill_and_submit_register_account_form
   click_button('Create Account')
 end
 
-def fill_new_user_form
-  fill_in('Email', with: 'user@mail.com')
-  select 'User', from: 'user[role_id]'
-  fill_in('Password', with: '12345678')
+def fill_new_user_form role= 'User', email= 'user@mail.com', password= '12345678'
+  fill_in('Email', with: email)
+  select role, from: 'user[role_id]'
+  fill_in('Password', with: password)
   fill_in('Confirm password', with: '12345678')
+end
+
+def fill_login_form email= 'user@mail.com', password= '12345678'
+  fill_in('Email', with: email)
+  fill_in('Password', with: password)
 end
 
 def cleanup_database
@@ -130,4 +143,18 @@ def register_account
   visit new_account_path
   fill_and_submit_register_account_form
   Capybara.default_host = "http://testsubdomain.lvh.me:3000"
+
+def create_user_with_permission permission
+  permission = "User" if permission == "cannot manage users"
+  step "AccountOwner visits user management page"
+  step "creates new user with role \"#{permission}\""
+end
+
+def login_new_user
+  step "user logged out"
+  visit new_user_session_path
+  fill_login_form
+  click_button("Log in")
+end
+
 end
