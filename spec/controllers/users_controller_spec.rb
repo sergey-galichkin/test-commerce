@@ -73,6 +73,29 @@ RSpec.describe UsersController, type: :controller do
       end
     end
 
+    { create: :post, update: :put }.each do |action, method|
+      context "when input param is blank" do
+        describe "#{method}##{action}" do
+          let(:id) { account_owner.id }
+          let(:user_id) { id }
+
+          let(:params) { {user: {} }} if action == :create
+          let(:params) { {user: {}, id: user_id }} if action == :update
+
+          it "has exception" do
+            expect { send(method, action, params) }.to raise_error(ActionController::ParameterMissing)
+          end
+        end
+      end
+    end
+
+    describe "GET#new" do
+      it "should create new instance of User(@user)" do
+        get :new
+        expect(assigns(:user)).to be_a_new(User)
+      end
+    end
+
     describe "POST#create" do
       let(:email) { 'user@mail.com' }
       let(:role) { Role.last }
