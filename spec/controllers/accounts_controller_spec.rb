@@ -32,6 +32,28 @@ RSpec.shared_examples "when login parameters are invalid" do
   end
 end
 
+RSpec.shared_examples "when registers account" do
+
+  it "creates Account" do
+    expect(Account).to be_exist subdomain: subdomain
+  end
+
+  it "creates User" do
+    expect(User).to be_exist email: email
+  end
+
+  it "switches tenant" do
+    expect(Apartment::Tenant.current).to eq(subdomain)
+  end
+
+  it { is_expected.to have_http_status(:redirect) }
+
+  it do
+    params = { email: email, token: Account.last.registration_token }
+    is_expected.to redirect_to(accounts_login_with_token_url subdomain: subdomain, params: params)
+  end
+end
+
 RSpec.describe AccountsController, type: :controller do
   let(:params) { { name: 'testaccount', subdomain: subdomain, email: email, password: '12345678' } } 
   let(:subdomain) { 'testdomain' }
@@ -46,10 +68,33 @@ RSpec.describe AccountsController, type: :controller do
     it { is_expected.to render_template(:new) }
   end
 
+
+  describe "POST #create invalid params" do
+    let(:account_params) { params }
+    before(:each) { post :create, account: account_params }
+
+    [:name, :subdomain, :email, :password].each do |param|
+      context "when #{param} missing" do
+        let(:account_params) { params.reject { |key, value| key == param } }
+        it_behaves_like "when account could not be created"
+      end
+    end
+  end
+
   context "when AccountOwner role does not exist" do
     describe "POST #create" do
+      let!(:role_count) { Role.count }
       before(:each) { post :create, account: params }
-      it_behaves_like "when account could not be created"
+
+      it "creates role" do
+        expect(Role).to be_exist name: 'AccountOwner'
+      end
+
+      it "Role counter increased" do
+        expect(Role.count).to eq(role_count + 1)
+      end
+
+      it_behaves_like "when registers account"
     end
   end
 
@@ -67,37 +112,17 @@ RSpec.describe AccountsController, type: :controller do
     end
 
     describe "POST #create" do
-      let(:account_params) { params }
-      before(:each) { post :create, account: account_params }
-
-      [:name, :subdomain, :email, :password].each do |param|
-        context "when #{param} missing" do
-          let(:account_params) { params.reject { |key, value| key == param } }
-          it_behaves_like "when account could not be created"
-        end
-      end
+      let!(:role_count) { Role.count }
+      before(:each) { post :create, account: params }
 
       context "when successful" do
+        it_behaves_like "when registers account"
 
-        it "creates Account" do
-          expect(Account).to be_exist subdomain: subdomain
-        end
-
-        it "creates User" do
-          expect(User).to be_exist email: email
-        end
-
-        it "switches tenant" do
-          expect(Apartment::Tenant.current).to eq(subdomain)
-        end
-
-        it { is_expected.to have_http_status(:redirect) }
-
-        it do
-          params = { email: email, token: Account.last.registration_token }
-          is_expected.to redirect_to(accounts_login_with_token_url subdomain: subdomain, params: params)
+        it "does not create Role" do
+          expect(Role.count).to eq(role_count)
         end
       end
+
     end
   end
 
