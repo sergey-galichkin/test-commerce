@@ -94,7 +94,7 @@ RSpec.describe UsersController, type: :controller do
     { create: :post, update: :put }.each do |action, method|
       context "when input param is blank" do
         describe "#{method}##{action}" do
-          let(:id) { account_owner.id }
+          let(:id) { user_under_test.id }
           let(:user_id) { id }
 
           let(:params) { {user: {} }} if action == :create
