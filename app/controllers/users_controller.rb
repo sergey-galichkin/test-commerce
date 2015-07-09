@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_user, only: [:edit, :update, :destroy]
+  load_and_authorize_resource
 
   # GET#index
   def index
@@ -44,20 +44,13 @@ class UsersController < ApplicationController
 
   private
 
-  def set_user
-    @user = User.find(params[:id])
-  end
-
   def user_params
     params.required(:user).permit case params[:action]
     when 'update'
       par = []
-      if @user == current_user && current_user.role.name != 'AccountOwner'
-        par << :password
-      else
-        par << (params[:user][:password].present? && :password)
-      end
-      par << (params[:user][:role_id].present? && :role_id)
+      par << :role_id if can? :update_users_role, User
+      par << :password if can? :update_users_password, User
+      par
     when 'create'
       [:password, :role_id, :email]
     else

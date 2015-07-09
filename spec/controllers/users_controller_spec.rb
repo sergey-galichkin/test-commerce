@@ -1,11 +1,9 @@
 require 'rails_helper'
+require "cancan/matchers"
 
 RSpec.shared_examples "when user could not be created or updated" do
-
   it { is_expected.to have_http_status(:ok) }
-
   it { is_expected.to render_template(template) }
-
   it "didn't change User.count" do
     expect(User.count).to eq(user_count)
   end
@@ -15,40 +13,48 @@ RSpec.shared_examples "when logged in user updates password" do
   it "updates User password" do
     expect(User.find(id).encrypted_password).not_to eq(origin_password)
   end
-
   it "re-sign-ins user" do
     expect(controller).to have_received(:sign_in).with(signed_user, bypass: true)
   end
-
   it "User.count not changed" do
     expect(User.count).to eq(user_count)
   end
-
   it { is_expected.to redirect_to(users_path) }
 end
+
+RSpec.shared_context "when user have update password permission" do
+  let(:user_params) { params }
+  let!(:origin_password) {user_under_test.encrypted_password}
+  let(:signed_user) { user_under_test }
+  before(:each) do
+    user_under_test.update role: create(update_users_role)
+    @origin_role = user_under_test.role
+    allow(controller).to receive(:sign_in)
+    put :update, id: id, user: user_params
+  end
+end
+
 
 RSpec.describe UsersController, type: :controller do
   # TODO: move to shared context
   let(:account) { create :account }
-  let (:account_owner) { create(:account_owner_user) }
+  let(:user_under_test) { create(:user) }
   before(:each) do
     Apartment::Tenant.switch! account.subdomain
-    sign_in account_owner
+    user_under_test.update role: create(:manage_users_role)
+    sign_in user_under_test
   end
 
   describe "when user not logged in" do
-    before(:each) { sign_out account_owner }
+    before(:each) { sign_out user_under_test }
     subject { response }
     let(:params) { {} }
 
     { index: :get, new: :get, create: :post, edit: :get, update: :put, destroy: :delete }.each do |action, method|
-
       describe "#{method}##{action}" do
-        let(:params) { {id: account_owner.id} } if [:edit, :update, :destroy].include? action
+        let(:params) { {id: user_under_test.id} } if [:edit, :update, :destroy].include? action
         before(:each) { send(method, action, params) }
-
         it { is_expected.to have_http_status(:found) }
-
         it { is_expected.to redirect_to(new_user_session_path) }
       end
     end
@@ -61,15 +67,27 @@ RSpec.describe UsersController, type: :controller do
 
     %w{index new edit }.each do |action|
       describe "GET##{action}" do
-        let(:params) { {id: account_owner.id} } if action == 'edit'
-        before(:each) { get action, params }
+        let(:params) { {id: user_under_test.id} } if action == 'edit'
+        context "when user does not have permission" do
+          before(:each) do
+            case action
+            when 'index' then user_under_test.update role: create(:role)
+            when 'new'then user_under_test.role.update can_create_users: false
+            when 'edit' then user_under_test.role.update can_update_users_role: false, can_update_users_password: false
+            end
+            get action, params
+          end
+          it { is_expected.to redirect_to(root_path) }
+        end
 
-        it { is_expected.to have_http_status(:ok) }
-
-        it { is_expected.to render_template(action) }
-
-        it { expect { controller }.not_to raise_error() }
-
+        context "when user has permission" do
+          before(:each) do
+            user_under_test.update role: create(action == 'edit'? :update_users_role_role : :create_users_role)
+            get action, params
+          end
+          it { is_expected.to have_http_status(:ok) }
+          it { is_expected.to render_template(action) }
+        end
       end
     end
 
@@ -101,31 +119,46 @@ RSpec.describe UsersController, type: :controller do
       let(:role) { Role.last }
       let(:params) { { email: email, password: '12345678', role_id: role.id } }
       let(:template) { :new }
-      before(:each) { post :create, user: user_params }
-      
-      context "when invalid params" do
-        [:email, :password, :role_id].each do |param|
-          context "when #{param} missing" do
-            let(:user_params) { params.reject { |key, value| key == param } }
-            it_behaves_like "when user could not be created or updated"
-          end
 
-          context "when #{param} wrong" do
-            let(:user_params) { params.merge({ param => "wrong" }) }
-            it_behaves_like "when user could not be created or updated"
-          end
+      context "when user does not have permission" do
+        let(:user_params) { params }
+        before(:each) do
+          user_under_test.role.update can_create_users: false
+          post :create, user: user_params
         end
+        it { is_expected.to redirect_to(root_path) }
       end
 
-      context "when successfull" do
-        let(:user_params) { params }
-        it "creates User" do
-          expect(User).to be_exist email: email
+      context "when user has permission" do
+        before(:each) do
+          user_under_test.update role: create(:create_users_role)
+          post :create, user: user_params
         end
-        it "User.count increased by 1" do
-          expect(User.count).to eq(user_count + 1)
+
+        context "when invalid params" do
+          [:email, :password, :role_id].each do |param|
+            context "when #{param} missing" do
+              let(:user_params) { params.reject { |key, value| key == param } }
+              it_behaves_like "when user could not be created or updated"
+            end
+
+            context "when #{param} wrong" do
+              let(:user_params) { params.merge({ param => "wrong" }) }
+              it_behaves_like "when user could not be created or updated"
+            end
+          end
         end
-        it { is_expected.to redirect_to(users_path) }
+
+        context "when successfull" do
+          let(:user_params) { params }
+          it "creates User" do
+            expect(User).to be_exist email: email
+          end
+          it "User.count increased by 1" do
+            expect(User.count).to eq(user_count + 1)
+          end
+          it { is_expected.to redirect_to(users_path) }
+        end
       end
     end
 
@@ -133,49 +166,48 @@ RSpec.describe UsersController, type: :controller do
       let(:role) { create(:role) }
       let(:params) { {password: '12345678', role_id: role.id} }
       let(:template) { :edit }
-      let(:id) { account_owner.id }
-      let(:user_id) { id }
+      let(:id) { user_under_test.id }
 
-      context "when id wrong" do
+      context "when user does not have permission" do
         let(:user_params) { params }
-        let(:user_id) { id+100 }
-        subject { put :update, id: user_id, user: user_params }
-        it {expect{subject}.to raise_error(ActiveRecord::RecordNotFound) }
-      end
-
-      [:password, :role_id].each do |param|
-        context "when #{param} wrong" do
-          before(:each) { put :update, id: user_id, user: user_params }
-          let(:user_params) { params.merge({ param => "wrong" }) }
-          it_behaves_like "when user could not be created or updated"
+        before(:each) do
+          user_under_test.role.update can_update_users_role: false, can_update_users_password: false
+          put :update, id: id, user: user_params
         end
+        it { is_expected.to redirect_to(root_path) }
       end
 
-      context "when AccountOwner" do
-        context "when successful" do
-          let!(:origin_password) {account_owner.encrypted_password}
+      context "when user has permission" do
+        context "when parameters invalid" do
+          before(:each) { user_under_test.update role: create(:update_users_role_and_password_role) }
+          context "when id wrong" do
+            let(:user_params) { params }
+            let(:user_id) { id+100 }
+            subject { put :update, id: user_id, user: user_params }
+            it {expect{subject}.to raise_error(ActiveRecord::RecordNotFound) }
+          end
+
+          [:password, :role_id].each do |param|
+            context "when #{param} wrong" do
+              before(:each) { put :update, id: id, user: user_params }
+              let(:user_params) { params.merge({ param => "wrong" }) }
+              it_behaves_like "when user could not be created or updated"
+            end
+          end
+        end
+
+        context "when user has update role permission" do
           let(:user_params) { params }
-          let(:signed_user) { account_owner }
+          let!(:origin_password) {user_under_test.encrypted_password}
           before(:each) do
+            user_under_test.update role: create(:update_users_role_role)
             allow(controller).to receive(:sign_in)
-            put :update, id: user_id, user: user_params
+            put :update, id: id, user: user_params
           end
-
-          it "updates User role" do
+          it "updates user role" do
             expect(User.find(id).role).to eq role
           end
-
-          it_behaves_like "when logged in user updates password"
-        end
-
-        context "when password is blank" do
-          let!(:origin_password) {account_owner.encrypted_password}
-          let(:user_params) { params.merge({ password: ''}) }
-          before(:each) { put :update, id: user_id, user: user_params }
-          it "updates User role" do
-            expect(User.find(id).role).to eq role
-          end
-          it "does not update User password" do
+          it "does not update user password" do
             expect(User.find(id).encrypted_password).to eq(origin_password)
           end
           it "User.count not changed" do
@@ -183,71 +215,71 @@ RSpec.describe UsersController, type: :controller do
           end
           it { is_expected.to redirect_to(users_path) }
         end
-      end
 
-      context "when User" do
-        let(:some_user) { create :user}
-        let!(:origin_password) {some_user.encrypted_password}
-        let!(:user_count) { User.count }
-        let(:id) { some_user.id }
-        before(:each) do
-          sign_out account_owner
-          account_owner.destroy
-          sign_in some_user
-          allow(controller).to receive(:sign_in)
-          put :update, id: id, user: user_params
-        end
-        context "when successful" do
-          let(:user_params) { params.reject { |key, value| key == :role_id } }
-          let(:signed_user) { some_user }
-
+        context "when user has update password permission" do
+          let(:update_users_role) { :update_users_password_role }
+          include_context "when user have update password permission"
+          it "does not update user role" do
+            expect(User.find(id).role).to eq @origin_role
+          end
           it_behaves_like "when logged in user updates password"
         end
 
-        context "when password is blank" do
-          let(:user_params) { { password: ''} }
-
-          it_behaves_like "when user could not be created or updated"
+        context "when user has update role and update password permissions" do
+          let(:update_users_role) { :update_users_role_and_password_role }
+          include_context "when user have update password permission"
+          it "updates user role" do
+            expect(User.find(id).role).to eq role
+          end
+          it_behaves_like "when logged in user updates password"
         end
       end
     end
 
     describe "DELETE#destroy" do
-      let(:some_user) { create(:user) }
-      let(:id) { some_user.id }
-      let(:user_id) { id }
-      context "when id wrong" do
-        let(:user_id) { id+100 }
-        subject { delete :destroy, id: user_id }
-        it {expect{subject}.to raise_error(ActiveRecord::RecordNotFound) }
-      end
-      context "when successful" do
-        before(:each) { delete :destroy, id: user_id }
+      let(:id) { user_under_test.id }
 
-        it "deletes user" do
-          expect{some_user.reload}.to raise_error(ActiveRecord::RecordNotFound)
+      context "when user does not have permission" do
+        let(:user_params) { params }
+        before(:each) do
+          user_under_test.role.update can_delete_users: false
+          delete :destroy, id: id
         end
-
-        it "User.count decreased by 1" do
-          expect(User.count).to eq(1)
-        end
-
-        it { is_expected.to redirect_to(users_path) }
+        it { is_expected.to redirect_to(root_path) }
       end
 
-      context "when try to delete logged in user" do
-        let(:user_id) { account_owner.id }
-        before(:each) { delete :destroy, id: user_id }
+      context "when user has permission" do
+        let(:some_user) { create(:user) }
+        let(:id) { some_user.id }
+        before(:each) { user_under_test.update role: create(:delete_users_role) }
 
-        it "does not delete user" do
-          expect(account_owner.reload).to be(account_owner)
+        context "when id wrong" do
+          let(:user_id) { id+100 }
+          subject { delete :destroy, id: user_id }
+          it {expect{subject}.to raise_error(ActiveRecord::RecordNotFound) }
         end
 
-        it "User.count not changed" do
-          expect(User.count).to eq(user_count)
+        context "when successful" do
+          before(:each) { delete :destroy, id: id }
+          it "deletes user" do
+            expect{some_user.reload}.to raise_error(ActiveRecord::RecordNotFound)
+          end
+          it "User.count decreased by 1" do
+            expect(User.count).to eq(1)
+          end
+          it { is_expected.to redirect_to(users_path) }
         end
 
-        it { is_expected.to redirect_to(users_path) }
+        context "when try to delete logged in user" do
+          before(:each) { delete :destroy, id: id }
+          it "does not delete user" do
+            expect(user_under_test.reload).to be(user_under_test)
+          end
+          it "User.count not changed" do
+            expect(User.count).to eq(user_count)
+          end
+          it { is_expected.to redirect_to(users_path) }
+        end
       end
     end
   end

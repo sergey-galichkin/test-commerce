@@ -22,6 +22,9 @@ gem 'apartment', '~> 1.0.1'
 # Devise is a flexible authentication solution for Rails based on Warden
 gem 'devise', '~> 3.5.1'
 
+# simple authorization solution for Rails which is decoupled from user roles
+gem 'cancancan', '~> 1.12.0'
+
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
