@@ -47,10 +47,8 @@ class UsersController < ApplicationController
   def user_params
     params.required(:user).permit case params[:action]
     when 'update'
-      par = []
-      par << :role_id if can? :update_users_role, User
-      par << :password if can? :update_users_password, User
-      par
+      [(:role_id if can? :update_users_role, User),
+      (:password if can? :update_users_password, User)].compact
     when 'create'
       [:password, :role_id, :email]
     else
