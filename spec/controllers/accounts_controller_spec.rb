@@ -23,8 +23,6 @@ end
 
 RSpec.shared_examples "when login parameters are invalid" do
 
-  it { is_expected.to have_http_status(:redirect) }
-
   it { is_expected.to redirect_to(new_account_url subdomain: false) }
 
   it "resets tenant" do
@@ -45,8 +43,6 @@ RSpec.shared_examples "when registers account" do
   it "switches tenant" do
     expect(Apartment::Tenant.current).to eq(subdomain)
   end
-
-  it { is_expected.to have_http_status(:redirect) }
 
   it do
     params = { email: email, token: Account.last.registration_token }
