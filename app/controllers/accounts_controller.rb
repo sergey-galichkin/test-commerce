@@ -13,11 +13,9 @@ class AccountsController < ApplicationController
       Apartment::Tenant.switch!(account.subdomain)
 
       user = User.new user_params
-
-      user.role = Role.find_by role_params
-      user.role = Role.create! role_params.merge({ name:'AccountOwner'}) if user.role.nil?
-
+      user.role = Role.find_by(role_params) || Role.create!(role_params.merge({ name:'AccountOwner'}))
       user.save!
+
       redirect_to url_for(action: :login_with_token, subdomain: account.subdomain, token: account.registration_token, email: user.email)
     rescue
       account.destroy
