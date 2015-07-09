@@ -95,12 +95,8 @@ RSpec.describe UsersController, type: :controller do
       context "when input param is blank" do
         describe "#{method}##{action}" do
           let(:id) { user_under_test.id }
-          let(:user_id) { id }
-
-          let(:params) { {user: {} }} if action == :create
-          let(:params) { {user: {}, id: user_id }} if action == :update
-
-          it "has exception" do
+          let(:params) { (action == :update)? {user: {}, id: id } : {user: {} } }
+          it "raises exception" do
             expect { send(method, action, params) }.to raise_error(ActionController::ParameterMissing)
           end
         end
