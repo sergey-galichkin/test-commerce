@@ -11,7 +11,7 @@ Background:
 
   Scenario: User with create users permission opens user management page
     Given User with "create users" permission visits user management page
-    Then user management page contains disabled "Create" button
+    Then page contains "Create" link
 
   Scenario: User with delete users permission opens user management page
     Given User with "delete users" permission visits user management page

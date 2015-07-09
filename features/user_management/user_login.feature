@@ -32,25 +32,6 @@ Background:
 
   # Scenario: user logs in with blank password
 
-  Scenario: user opens change password page
-    Given registered user logs in
-    When user clicks "Change Password" link
-    Then user is redirected to "/users/1/edit" page
-    And change password page contains all fields
-
-  Scenario: user changes password
-    Given registered user logs in
-    When user clicks "Change Password" link
-    And user enters new password
-    When presses "Update" button
-    Then user is redirected to "/users" page
-
-  # Scenario: user changes password/enters blank password
-
-  # Scenario: user changes password/re-enters blank password
-
-  # Scenario: user changes password/re-enters incorrect password
-
   # Scenario: user opens password reset page
 
   # Scenario: user receives password reset instuctions

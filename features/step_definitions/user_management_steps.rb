@@ -136,6 +136,11 @@ end
 def create_roles
   FactoryGirl.create(:account_owner_role)
   FactoryGirl.create(:user_role)
+  FactoryGirl.create(:create_users_role)
+  FactoryGirl.create(:update_users_role_role)
+  FactoryGirl.create(:update_users_password_role)
+  FactoryGirl.create(:update_users_role_and_password_role)
+  FactoryGirl.create(:delete_users_role)
 end
 
 def register_account
