@@ -22,6 +22,9 @@ gem 'apartment', '~> 1.0.1'
 # Devise is a flexible authentication solution for Rails based on Warden
 gem 'devise', '~> 3.5.1'
 
+# simple authorization solution for Rails which is decoupled from user roles
+gem 'cancancan', '~> 1.12.0'
+
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
@@ -41,6 +44,9 @@ gem 'slim-rails', '~> 3.0.1'
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
+
+# Shim to load environment variables from .env into ENV in development.
+gem 'dotenv-rails', '~> 2.0.2', :groups => [:development, :test]
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

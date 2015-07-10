@@ -13,7 +13,8 @@ class AccountsController < ApplicationController
       Apartment::Tenant.switch!(account.subdomain)
 
       user = User.new user_params
-      user.role = Role.find_by_name 'AccountOwner'
+      role_params = { can_create_users: true, can_update_users_password: true, can_update_users_role: true, can_delete_users: true }
+      user.role = Role.find_by(role_params) || Role.create!(role_params.merge({ name:'AccountOwner'}))
       user.save!
 
       redirect_to url_for(action: :login_with_token, subdomain: account.subdomain, token: account.registration_token, email: user.email)

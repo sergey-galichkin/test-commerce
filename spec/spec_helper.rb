@@ -108,6 +108,7 @@ RSpec.configure do |config|
 
   config.before(:each) do
     Account.destroy_all
+    Apartment::Tenant.reset
   end
 
   config.around(:each) do |example|

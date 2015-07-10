@@ -27,9 +27,13 @@ ActiveRecord::Schema.define(version: 20150624130545) do
   add_index "accounts", ["subdomain"], name: "index_accounts_on_subdomain", unique: true, using: :btree
 
   create_table "roles", force: :cascade do |t|
-    t.string   "name",       null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.string   "name",                      limit: 50,                 null: false
+    t.boolean  "can_create_users",                     default: false, null: false
+    t.boolean  "can_update_users_password",            default: false, null: false
+    t.boolean  "can_update_users_role",                default: false, null: false
+    t.boolean  "can_delete_users",                     default: false, null: false
+    t.datetime "created_at",                                           null: false
+    t.datetime "updated_at",                                           null: false
   end
 
   add_index "roles", ["name"], name: "index_roles_on_name", unique: true, using: :btree
