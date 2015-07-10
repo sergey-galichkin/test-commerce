@@ -5,7 +5,7 @@ RSpec.describe Rails.application.config do
     subject { Rails.application.config.action_mailer }
     it {expect(subject.default_url_options).to include(:host) }
     it {expect(subject.raise_delivery_errors).to be_truthy }
-    it {expect(subject.delivery_method).to eq :smtp }
+    it {expect(subject.delivery_method).to be_present }
     it {expect(subject.perform_deliveries).to be_truthy }
     it {expect(subject.smtp_settings).to include(:address, :port, :domain, :authentication, :enable_starttls_auto, :user_name, :password) }
   end
