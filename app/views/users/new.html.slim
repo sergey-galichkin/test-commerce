@@ -1,0 +1,14 @@
+= form_for(@user) do |f|
+  .field
+    = f.label :email
+    = f.email_field :email
+  .field
+    = f.label :role
+    = f.collection_select :role_id, Role.all, :id, :name
+  .field
+    = f.label :password
+    = f.password_field :password
+  .field
+    = f.label :confirm_password
+    = f.password_field :confirm_password
+  .actions = f.submit
