@@ -45,6 +45,9 @@ gem 'slim-rails', '~> 3.0.1'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
+# Shim to load environment variables from .env into ENV in development.
+gem 'dotenv-rails', '~> 2.0.2', :groups => [:development, :test]
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
