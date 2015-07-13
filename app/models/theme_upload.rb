@@ -8,11 +8,11 @@ class ThemeUpload
   def initialize bucket_name, redirect_url
     @policy_conditions = [[:eq, :$bucket, bucket_name],
                           [:eq, :$acl, :private],
-                          [:"content-length-range", 1, Rails.configuration.max_theme_zip_file_length],
+                          [:"content-length-range", 1, Rails.application.config.max_theme_zip_file_length],
                           [:"starts-with", :$key, UPLOADS_FOLDER_NAME + "/"],
                           [:eq, :$success_action_redirect, redirect_url]]
     @policy = { conditions: @policy_conditions, expiration: (Time.now + 10.hours).utc.iso8601 }
     @encoded_policy = Base64.strict_encode64(@policy.to_json)
-    @encoded_signature = Base64.strict_encode64(OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.configuration.aws_secret_access_key, @encoded_policy))
+    @encoded_signature = Base64.strict_encode64(OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), Rails.application.config.aws_secret_access_key, @encoded_policy))
   end
 end
