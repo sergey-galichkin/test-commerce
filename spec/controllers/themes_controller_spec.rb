@@ -69,7 +69,6 @@ RSpec.describe ThemesController, type: :controller do
         end
         it { is_expected.to redirect_to(root_path) }
       end
-
       context "when user has permission" do
         context "with valid parameters" do
           {"_qwerty.zip" => "qwerty", "1234_qwerty.zip" => "qwerty", "12345_67890_qwerty.zip" => "67890_qwerty"}.each do |key, theme_name|
@@ -80,25 +79,27 @@ RSpec.describe ThemesController, type: :controller do
             end
           end
           context "when theme already exists" do
-          end
-        end
-
-        context "when invalid parameters" do
-          let(:theme_name) { "#{Faker::Lorem.sentence}zip" }
-          let(:key) { "_#{theme_name}" }
-          subject { get :create_completed, key: key }
-
-          context "when wrong file extension (not .zip)" do
-            let(:theme_name) { "#{Faker::Lorem.sentence}" }
+            let(:existing_theme) { create(:theme) }
+            subject { get :create_completed, key: "#{SecureRandom.uuid}_#{existing_theme.name}.zip" }
             it { is_expected.to redirect_to action: :new }
           end
-
+        end
+        context "when invalid parameters" do
+          let(:theme_name) { "#{Faker::Internet.url}.zip" }
+          let(:key) { "_#{theme_name}" }
+          subject { get :create_completed, key: key }
+          context "when wrong file extension (not .zip)" do
+            let(:theme_name) { "#{Faker::Internet.url}.rar" }
+            it { is_expected.to redirect_to action: :new }
+          end
           context "when theme name blank" do
             let(:theme_name) { '' }
             it { is_expected.to redirect_to action: :new }
           end
-
-          context "when key missing" do
+          context "when params missing" do
+            it "raises exception" do
+              expect { get :create_completed }.to raise_error(ActionController::ParameterMissing)
+            end
           end
         end
       end

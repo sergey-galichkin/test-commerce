@@ -11,7 +11,12 @@ RSpec.describe Theme, type: :model do
     it {expect(build(:theme)).to validate_uniqueness_of(:zip_file_url).case_insensitive}
     it {is_expected.to validate_length_of(:zip_file_url).is_at_most Theme::ZIP_FILE_URL_LIMIT }
     it {is_expected.to have_db_column(:zip_file_url).with_options limit: Theme::ZIP_FILE_URL_LIMIT, null: false }
-
+    %w{filename.zip filename.ZIP filename.ZiP}.each do |filename|
+        it {is_expected.to allow_value(filename).for(:zip_file_url) }
+    end
+    %w{filename filename. filename.z filename.zi filename.abc filename.ziip}.each do |filename|
+        it {is_expected.to_not allow_value(filename).for(:zip_file_url) }
+    end
     it {is_expected.to validate_presence_of :status}
     it {is_expected.to have_db_column(:status).with_options null: false, default: Theme.statuses[:processing]}
   end
