@@ -104,5 +104,41 @@ RSpec.describe ThemesController, type: :controller do
         end
       end
     end
+
+    describe "DELETE#destroy" do
+      let(:theme) { create(:theme) }
+      let(:id) { theme.id }
+      context "when user does not have permission" do
+        before(:each) do
+          user_under_test.role.update can_delete_themes: false
+          delete :destroy, id: id
+        end
+        it { is_expected.to redirect_to(root_path) }
+      end
+
+      context "when user has permission" do
+        context "when id wrong" do
+          let(:id) { theme.id+100 }
+          subject { delete :destroy, id: id }
+          it "raises exception" do
+            expect {subject}.to raise_error(ActiveRecord::RecordNotFound)
+          end
+        end
+        context "when successful" do
+          before(:each) do
+            id = theme.id
+            @count = Theme.count
+            delete :destroy, id: id
+          end
+          it "deletes theme" do
+            expect{theme.reload}.to raise_error(ActiveRecord::RecordNotFound)
+          end
+          it "Theme.count decreased by 1" do
+            expect(Theme.count).to eq(@count-1)
+          end
+          it { is_expected.to redirect_to(themes_path) }
+        end
+      end
+    end
   end
 end

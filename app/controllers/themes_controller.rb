@@ -8,6 +8,7 @@ class ThemesController < ApplicationController
 
   #GET#new
   def new
+    @theme = Theme.new
   end
 
   # GET#create_completed redirect from AWS
@@ -25,5 +26,7 @@ class ThemesController < ApplicationController
 
   #DELETE#destroy
   def destroy
+    @theme.destroy
+    redirect_to themes_path
   end
 end
