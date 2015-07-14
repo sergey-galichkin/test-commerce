@@ -25,16 +25,35 @@ RSpec.describe ThemesController, type: :controller do
 
   describe "GET #create_completed (redirect from AWS)" do
     context "with valid parameters" do
+      {"_qwerty.zip" => "qwerty", "1234_qwerty.zip" => "qwerty", "12345_67890_qwerty.zip" => "67890_qwerty"}.each do |key, theme_name|
+        context "when parsing key: #{key}" do
+          subject { get :create_completed, key: key }
+          it { is_expected.to redirect_to action: :index }
+          it_behaves_like "creating Theme in DB", key, theme_name
+        end
+      end
+    end
+
+    context "when invalid parameters" do
       let(:theme_name) { "#{Faker::Lorem.sentence}zip" }
       let(:key) { "_#{theme_name}" }
       subject { get :create_completed, key: key }
-      it { is_expected.to redirect_to action: :index }
+
+      context "when wrong file extension (not .zip)" do
+        let(:theme_name) { "#{Faker::Lorem.sentence}" }
+        it { is_expected.to redirect_to action: :new }
+      end
+
+      context "when theme name blank" do
+        let(:theme_name) { '' }
+        it { is_expected.to redirect_to action: :new }
+      end
+
+      context "when key missing" do
+      end
     end
 
-    {"_qwerty" => "qwerty", "1234_qwerty" => "qwerty", "12345_67890_qwerty" => "67890_qwerty"}.each do |key, theme_name|
-      describe "when parsing key: #{key}" do
-        it_behaves_like "creating Theme in DB", key, theme_name
-      end
+    context "when theme already exists" do
     end
   end
 end

@@ -47,7 +47,9 @@ module TestCommerce
       password: ENV["GMAIL_PASSWORD"]}
 
     # AWS bucket config
-    config.max_theme_zip_file_length = 1.gigabyte
+    config.aws_max_theme_zip_file_length = 1.gigabyte
+    config.aws_access_key = ENV["AWS_ACCESS_KEY"]
     config.aws_secret_access_key = ENV["AWS_SECRET_ACCESS_KEY"]
+    config.aws_public_bucket_name = "flexcommerce-uploadedthemes"
   end
 end
