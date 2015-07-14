@@ -31,6 +31,16 @@ FactoryGirl.define do
       can_update_users_role true
       can_delete_users true
     end
+    factory :create_themes_role do
+      can_create_themes true
+    end
+    factory :delete_themes_role do
+      can_delete_themes true
+
+      factory :manage_themes_role do
+        can_create_themes true
+      end
+    end
   end
 
   factory :account_owner_role, parent: :manage_users_role do

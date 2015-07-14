@@ -10,5 +10,9 @@ class Ability
     can :destroy, User if user.role.can_delete_users?
     can :update_users_role, User if user.role.can_update_users_role?
     can :update_users_password, User if user.role.can_update_users_password?
+    can :read, Theme if user.role.can_create_themes? || user.role.can_delete_themes?
+    can :create, Theme if user.role.can_create_themes?
+    can :create_completed, Theme if user.role.can_create_themes?
+    can :destroy, Theme if user.role.can_delete_themes?
   end
 end

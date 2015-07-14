@@ -1,9 +1,12 @@
 class ThemesController < ApplicationController
-  # GET#index
+  before_action :authenticate_user!
+  load_and_authorize_resource
+
+  #GET#index
   def index
   end
 
-  # GET#new
+  #GET#new
   def new
   end
 
@@ -17,4 +20,9 @@ class ThemesController < ApplicationController
     Theme.create! name: theme_name, zip_file_url: key, status: :processing
     redirect_to action: :index
   end
+
+  #DELETE#destroy
+  def destroy
+  end
+
 end
