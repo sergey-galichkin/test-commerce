@@ -2,7 +2,7 @@ module ThemesHelper
   UPLOADS_FOLDER = 'uploads/'
 
   def theme_upload_params
-    return @theme_upload_params if @theme_upload_params.present?
+    return @theme_upload_params if @theme_upload_params
 
     bucket_name = Rails.application.config.aws_public_bucket_name
     redirect_url = request.protocol + request.host_with_port + '/themes/create_completed'
