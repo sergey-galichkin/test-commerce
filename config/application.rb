@@ -51,5 +51,7 @@ module TestCommerce
     config.aws_access_key = ENV["AWS_ACCESS_KEY"]
     config.aws_secret_access_key = ENV["AWS_SECRET_ACCESS_KEY"]
     config.aws_public_bucket_name = "flexcommerce-uploadedthemes"
+    config.aws_private_bucket_name = "flexcommerce-productionthemes"
+    config.aws_region = "us-east-1"
   end
 end

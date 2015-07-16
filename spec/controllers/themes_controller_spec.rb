@@ -10,6 +10,21 @@ RSpec.shared_examples "creating Theme in DB" do |key, theme_name|
   end
 end
 
+RSpec.shared_examples "uncussessfull create_completed" do
+  it "deletes theme from public bucket" do
+    expect(AmazonAwsClient).to have_received(:delete_from_public_bucket)
+  end
+  it { is_expected.to redirect_to action: :new }
+end
+
+RSpec.shared_context "context for uncussessfull create_completed" do
+  before(:each) do
+    allow(AmazonAwsClient).to receive(:delete_from_public_bucket)
+    get :create_completed, key: key
+  end
+  subject { response }
+end
+
 RSpec.describe ThemesController, type: :controller do
   let(:account) { create :account }
   let(:user_under_test) { create(:user) }
@@ -74,14 +89,16 @@ RSpec.describe ThemesController, type: :controller do
           {"_qwerty.zip" => "qwerty", "1234_qwerty.zip" => "qwerty", "12345_67890_qwerty.zip" => "67890_qwerty"}.each do |key, theme_name|
             context "when parsing key: #{key}" do
               subject { get :create_completed, key: key }
-              it { is_expected.to redirect_to action: :index }
               it_behaves_like "creating Theme in DB", key, theme_name
+              it { expect { subject }.to enqueue_a(TransferThemeJob).with(global_id(Theme)) }
+              it { is_expected.to redirect_to action: :index }
             end
           end
           context "when theme already exists" do
             let(:existing_theme) { create(:theme) }
-            subject { get :create_completed, key: "#{SecureRandom.uuid}_#{existing_theme.name}.zip" }
-            it { is_expected.to redirect_to action: :new }
+            let(:key) {"#{SecureRandom.uuid}_#{existing_theme.name}.zip"}
+            include_context "context for uncussessfull create_completed"
+            it_behaves_like "uncussessfull create_completed"
           end
         end
         context "when invalid parameters" do
@@ -90,11 +107,13 @@ RSpec.describe ThemesController, type: :controller do
           subject { get :create_completed, key: key }
           context "when wrong file extension (not .zip)" do
             let(:theme_name) { "#{Faker::Internet.url}.rar" }
-            it { is_expected.to redirect_to action: :new }
+            include_context "context for uncussessfull create_completed"
+            it_behaves_like "uncussessfull create_completed"
           end
           context "when theme name blank" do
             let(:theme_name) { '' }
-            it { is_expected.to redirect_to action: :new }
+            include_context "context for uncussessfull create_completed"
+            it_behaves_like "uncussessfull create_completed"
           end
           context "when params missing" do
             it "raises exception" do

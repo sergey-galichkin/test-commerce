@@ -6,5 +6,7 @@ RSpec.describe Rails.application.config do
     it { expect(subject.aws_access_key).to be_a String }
     it { expect(subject.aws_secret_access_key).to be_a String }
     it { expect(subject.aws_public_bucket_name).to be_a String }
+    it { expect(subject.aws_private_bucket_name).to be_a String }
+    it { expect(subject.aws_region).to be_a String }
   end
 end

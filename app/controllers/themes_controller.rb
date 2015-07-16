@@ -18,8 +18,10 @@ class ThemesController < ApplicationController
     theme_name =  File.basename theme_file_name, File.extname(theme_file_name)
     theme = Theme.create name: theme_name, zip_file_url: key, status: :processing
     if theme.valid?
+      TransferThemeJob.perform_later theme
       redirect_to action: :index
     else
+      AmazonAwsClient.delete_from_public_bucket key
       redirect_to action: :new
     end
   end

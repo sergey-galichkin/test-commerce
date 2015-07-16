@@ -48,6 +48,9 @@ gem 'slim-rails', '~> 3.0.1'
 # Shim to load environment variables from .env into ENV in development.
 gem 'dotenv-rails', '~> 2.0.2', :groups => [:development, :test]
 
+# Official Amazon AWS SDK
+gem 'aws-sdk', '~> 2.1.7'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
@@ -70,4 +73,5 @@ group :test do
   gem 'factory_girl_rails', '~> 4.0'
   gem 'shoulda-matchers', '~> 2.8.0'
   gem 'faker', '~> 1.4.3'
+  gem 'rspec-activejob', '~> 0.4.1'
 end
