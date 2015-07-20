@@ -13,10 +13,16 @@ module AmazonAwsClient
   end
 
   def self.delete_from_public_bucket key
-    self.client.delete_object bucket: Rails.application.config.aws_public_bucket_name, key: key
+    self.delete_from_bucket Rails.application.config.aws_public_bucket_name, key
   end
 
   def self.delete_from_private_bucket key
-    self.client.delete_object bucket: Rails.application.config.aws_private_bucket_name, key: key
+    self.delete_from_bucket Rails.application.config.aws_private_bucket_name, key
+  end
+
+  private
+
+  def self.delete_from_bucket bucket, key
+    self.client.delete_object bucket: bucket, key: key
   end
 end

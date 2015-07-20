@@ -1,5 +1,5 @@
 class Theme < ActiveRecord::Base
-  after_validation :schedule_theme_delete_if_errors, on: :create
+  after_validation :schedule_theme_delete, on: :create, if: "errors.present?"
   before_destroy :schedule_theme_delete
   after_create :schedule_theme_transfer
 
@@ -20,9 +20,5 @@ class Theme < ActiveRecord::Base
 
   def schedule_theme_delete
     DeleteThemeJob.perform_later(zip_file_url, processing?)
-  end
-
-  def schedule_theme_delete_if_errors
-    DeleteThemeJob.perform_later(zip_file_url, true) if errors.present?
   end
 end
