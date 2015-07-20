@@ -19,7 +19,7 @@ class Theme < ActiveRecord::Base
   end
 
   def schedule_theme_delete
-    DeleteThemeJob.perform_later(zip_file_url, processing? ? true : false)
+    DeleteThemeJob.perform_later(zip_file_url, processing?)
   end
 
   def schedule_theme_delete_if_errors
