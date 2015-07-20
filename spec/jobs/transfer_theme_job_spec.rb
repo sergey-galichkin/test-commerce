@@ -4,12 +4,10 @@ RSpec.describe TransferThemeJob, type: :job do
   include ActiveJob::TestHelper
 
   let(:theme) { create(:theme) }
-  subject(:job) { described_class.perform_later(theme) }
 
   describe "when queued" do
-
     it "queues the job" do
-      expect { job }.to change(ActiveJob::Base.queue_adapter.enqueued_jobs, :size).by(1)
+      expect { theme }.to change(ActiveJob::Base.queue_adapter.enqueued_jobs, :size).by(1)
     end
 
     it "is in default queue" do
@@ -18,6 +16,7 @@ RSpec.describe TransferThemeJob, type: :job do
   end
 
   describe "when executes perform" do
+    subject(:job) { described_class.perform_later(theme) }
     it "transfer theme from public to private bucket" do
       expect(AmazonAwsClient).to receive(:transfer_from_public_to_private_bucket).with(theme.zip_file_url)
       perform_enqueued_jobs { job }

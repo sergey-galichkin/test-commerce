@@ -7,22 +7,13 @@ RSpec.shared_examples "creating Theme in DB" do |key, theme_name|
     it { is_expected.to be }
     its(:zip_file_url) { is_expected.to eq key }
     it { is_expected.to be_processing }
+    it { expect(Theme.count).to eq(1) }
   end
 end
 
 RSpec.shared_examples "uncussessfull create_completed" do
-  it "deletes theme from public bucket" do
-    expect(AmazonAwsClient).to have_received(:delete_from_public_bucket)
-  end
+  it { expect(Theme.count).to be_zero }
   it { is_expected.to redirect_to action: :new }
-end
-
-RSpec.shared_context "context for uncussessfull create_completed" do
-  before(:each) do
-    allow(AmazonAwsClient).to receive(:delete_from_public_bucket)
-    get :create_completed, key: key
-  end
-  subject { response }
 end
 
 RSpec.describe ThemesController, type: :controller do
@@ -50,7 +41,6 @@ RSpec.describe ThemesController, type: :controller do
   end
 
   describe "when user logged in" do
-    let!(:theme_count) { Theme.count }
     subject { response }
     %w{ index new }.each do |action|
       describe "GET##{action}" do
@@ -76,6 +66,7 @@ RSpec.describe ThemesController, type: :controller do
     end
 
     describe "GET#create_completed (redirect from AWS)" do
+      let!(:theme_count){ Theme.count }
       context "when user does not have permission" do
         let(:key) { "1234_qwerty.zip" }
         before(:each) do
@@ -85,34 +76,30 @@ RSpec.describe ThemesController, type: :controller do
         it { is_expected.to redirect_to(root_path) }
       end
       context "when user has permission" do
+        let(:theme_name) { "#{Faker::Internet.url}.zip" }
+        let(:key) {"#{SecureRandom.uuid}_#{theme_name}"}
+        subject { get :create_completed, key: key }
         context "with valid parameters" do
           {"_qwerty.zip" => "qwerty", "1234_qwerty.zip" => "qwerty", "12345_67890_qwerty.zip" => "67890_qwerty"}.each do |key, theme_name|
             context "when parsing key: #{key}" do
-              subject { get :create_completed, key: key }
               it_behaves_like "creating Theme in DB", key, theme_name
-              it { expect { subject }.to enqueue_a(TransferThemeJob).with(global_id(Theme)) }
               it { is_expected.to redirect_to action: :index }
             end
           end
           context "when theme already exists" do
             let(:existing_theme) { create(:theme) }
             let(:key) {"#{SecureRandom.uuid}_#{existing_theme.name}.zip"}
-            include_context "context for uncussessfull create_completed"
             it_behaves_like "uncussessfull create_completed"
           end
         end
         context "when invalid parameters" do
-          let(:theme_name) { "#{Faker::Internet.url}.zip" }
-          let(:key) { "_#{theme_name}" }
-          subject { get :create_completed, key: key }
           context "when wrong file extension (not .zip)" do
             let(:theme_name) { "#{Faker::Internet.url}.rar" }
-            include_context "context for uncussessfull create_completed"
+            subject { get :create_completed, key: key }
             it_behaves_like "uncussessfull create_completed"
           end
           context "when theme name blank" do
             let(:theme_name) { '' }
-            include_context "context for uncussessfull create_completed"
             it_behaves_like "uncussessfull create_completed"
           end
           context "when params missing" do
