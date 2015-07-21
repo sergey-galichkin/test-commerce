@@ -16,11 +16,13 @@ gem 'coffee-rails', '~> 4.1.0'
 
 # Use apartment for multi-tenant databases
 gem 'apartment', '~> 1.0.1'
+gem 'apartment-sidekiq', '~> 0.2.0'
 
 #bootstrap CSS
 #gem 'bootstrap-sass'
 # Devise is a flexible authentication solution for Rails based on Warden
 gem 'devise', '~> 3.5.1'
+gem 'devise-async', '~>0.10.1'
 
 # simple authorization solution for Rails which is decoupled from user roles
 gem 'cancancan', '~> 1.12.0'
