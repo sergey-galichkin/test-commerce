@@ -36,6 +36,9 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 
 gem 'slim-rails', '~> 3.0.1'
 
+# Simple, efficient background processing
+gem 'sidekiq', '~> 3.4.2'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

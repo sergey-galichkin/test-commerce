@@ -26,5 +26,12 @@ RSpec.describe TransferThemeJob, type: :job do
       perform_enqueued_jobs { job }
       expect(theme.reload.uploaded?).to be_truthy
     end
+    it "handles request timeout error" do
+      allow(AmazonAwsClient).to receive(:transfer_from_public_to_private_bucket).and_raise(Aws::S3::Errors::RequestTimeout.new('',''))
+      perform_enqueued_jobs do
+        expect_any_instance_of(TransferThemeJob).to receive(:retry_job).with(wait: 5.minutes, queue: :default)
+        theme
+      end
+    end
   end
 end
