@@ -63,10 +63,13 @@ group :test do
   gem 'cucumber-rails', '~> 1.4.2', require: false
   gem 'capybara', '~> 2.4.4'
   gem 'database_cleaner', '~> 1.4.1'
-  gem 'rspec-rails', '~> 3.2.3'
+  gem 'rspec-rails', '~> 3.3.1'
   gem 'factory_girl', '~> 4.5.0'
-  gem 'rspec-expectations', '~> 3.2.1'
+  gem 'rspec-expectations', '~> 3.3.0'
   gem 'factory_girl_rails', '~> 4.0'
   gem 'shoulda-matchers', '~> 2.8.0'
   gem 'faker', '~> 1.4.3'
+  gem 'poltergeist', '~> 1.6.0'
+  gem 'email_spec'
+  gem 'selenium-webdriver'
 end
