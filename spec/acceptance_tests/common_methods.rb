@@ -27,7 +27,7 @@ module Common_methods
 
   def cleanup_database
     Account.destroy_all
-    Apartment::Tenant.drop 'testsubdomain' rescue nil
+#    Apartment::Tenant.drop 'MySubdomain1' rescue nil
     Apartment::Tenant.reset
     DatabaseCleaner.clean
   end

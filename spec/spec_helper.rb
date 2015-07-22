@@ -123,6 +123,8 @@ RSpec.configure do |config|
 
   # DatabaseCleaner configuration
   config.before(:suite) do
+    Account.destroy_all
+    Apartment::Tenant.reset
      # Clean all tables to start
     DatabaseCleaner.clean_with :truncation
     # Use transactions for tests
@@ -137,14 +139,15 @@ RSpec.configure do |config|
   config.before(:each) do
     Account.destroy_all
     Apartment::Tenant.reset
+    DatabaseCleaner.clean_with :truncation
   end
 
-  config.around(:each) do |example|
-    ActionMailer::Base.deliveries.clear
-    DatabaseCleaner.cleaning do
-      example.run
-    end
-  end
+  # config.around(:each) do |example|
+  #   ActionMailer::Base.deliveries.clear
+  #   DatabaseCleaner.cleaning do
+  #     example.run
+  #   end
+  # end
 
   config.expect_with :rspec do |c|
     c.syntax = :expect

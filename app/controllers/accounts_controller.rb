@@ -7,7 +7,9 @@ class AccountsController < ApplicationController
   def create
     account = Account.new account_params
     account.registration_token = SecureRandom.uuid
+    p account.valid?
     return render :new until account.save
+    p "4"
 
     begin
       Apartment::Tenant.switch!(account.subdomain)

@@ -69,7 +69,7 @@ Capybara.register_driver :poltergeist do |app|
 
 Capybara.default_driver    = :poltergeist
 Capybara.javascript_driver = :poltergeist
-Capybara.default_driver    = :selenium
+#Capybara.default_driver    = :selenium
 
-Capybara.server_port = 8080
+Capybara.server_port = 3000
 Capybara.server_host = 'lvh.me'
