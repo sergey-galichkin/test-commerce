@@ -1,0 +1,17 @@
+- if can? :create, Theme
+  = link_to "Create New", new_theme_path
+
+table
+  thead
+    tr
+      th Name
+      th Status
+      th Actions
+  tbody
+    - @themes.each do |theme|
+      tr
+        td = theme.name
+        td = theme.status
+        td
+          - if can? :destroy, Theme
+            = link_to 'Delete', theme_path(theme), method: :delete

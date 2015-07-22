@@ -4,11 +4,7 @@ class ThemesController < ApplicationController
 
   # GET#index
   def index
-  end
-
-  # GET#new
-  def new
-    @theme = Theme.new
+    @themes = Theme.all
   end
 
   # GET#create_completed redirect from AWS

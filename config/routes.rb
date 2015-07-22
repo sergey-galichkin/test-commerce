@@ -19,6 +19,11 @@ Rails.application.routes.draw do
     resources :users, except: :show
   end
 
+  require 'sidekiq/web'
+  authenticate :user do
+    mount Sidekiq::Web => '/sidekiq'
+  end
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 
