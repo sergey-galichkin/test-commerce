@@ -1,4 +1,5 @@
-= link_to "Create New", new_user_path
+- if can? :create, User
+  = link_to "Create New", new_user_path
 
 table
   thead
@@ -12,5 +13,7 @@ table
         td = user.email
         td = user.role.name
         td
-          = link_to "Edit", edit_user_path(user)
-          = link_to 'Delete', user_path(user), method: :delete
+          - if can? :update, User
+            = link_to "Edit", edit_user_path(user)
+          - if can? :destroy, User
+            = link_to 'Delete', user_path(user), method: :delete
