@@ -80,6 +80,7 @@ test:
 #
 production:
   <<: *default
+  socket: /var/run/postgresql/.s.PGSQL.5432
   database: test-commerce_production
   username: test-commerce
   password: <%= ENV['TEST-COMMERCE_DATABASE_PASSWORD'] %>
