@@ -1,5 +1,5 @@
 set :branch, fetch(:branch, 'development')
-set :linked_files, fetch(:linked_files, []).push('config/unicorn/staging.rb')
+set :rails_env, 'production'
 
 # server-based syntax
 # ======================
@@ -20,9 +20,9 @@ set :linked_files, fetch(:linked_files, []).push('config/unicorn/staging.rb')
 # property set. Specify the username and a domain or IP for the server.
 # Don't use `:all`, it's a meta role.
 
-# role :app, %w{deploy@example.com}, my_property: :my_value
-# role :web, %w{user1@primary.com user2@additional.com}, other_property: :other_value
-# role :db,  %w{deploy@example.com}
+role :app, %w{user@ctg-staging}
+role :web, %w{user@ctg-staging}
+role :db, %w{user@ctg-staging}
 
 
 
@@ -34,7 +34,7 @@ set :linked_files, fetch(:linked_files, []).push('config/unicorn/staging.rb')
 # http://capistranorb.com/documentation/getting-started/configuration/
 # Feel free to add new variables to customise your setup.
 
-
+server 'test-commerce-staging.com', user: 'user', roles: %{web app}
 
 # Custom SSH Options
 # ==================
@@ -44,11 +44,11 @@ set :linked_files, fetch(:linked_files, []).push('config/unicorn/staging.rb')
 #
 # Global options
 # --------------
-set :ssh_options, {
-  keys: %w(/home/user/.ssh/id_rsa),
+# set :ssh_options, {
+#    keys: %w(/home/user/.ssh/id_rsa),
 #    forward_agent: false,
 #    auth_methods: %w(password)
-}
+# }
 #
 # The server-based syntax can be used to override options:
 # ------------------------------------
