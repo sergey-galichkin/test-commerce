@@ -40,7 +40,7 @@ gem 'slim-rails', '~> 3.0.1'
 # gem 'bcrypt', '~> 3.1.7'
 
 # Use Unicorn as the app server
-# gem 'unicorn'
+gem 'unicorn', '~> 4.9.0'
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
@@ -70,3 +70,10 @@ group :test do
   gem 'shoulda-matchers', '~> 2.8.0'
   gem 'faker', '~> 1.4.3'
 end
+
+# Deployment
+gem 'capistrano', '~> 3.4.0'
+gem 'capistrano-rvm', '~> 0.1.2'
+gem 'capistrano-bundler', '~> 1.1.4'
+gem 'capistrano-rails', '~> 1.1.3'
+gem 'capistrano3-unicorn', '~> 0.2.1'
