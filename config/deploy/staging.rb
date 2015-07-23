@@ -1,4 +1,4 @@
-set :branch, fetch(:branch, 'development')
+set :branch, 'development'
 set :rails_env, 'production'
 
 # server-based syntax
@@ -34,7 +34,7 @@ role :db, %w{user@ctg-staging}
 # http://capistranorb.com/documentation/getting-started/configuration/
 # Feel free to add new variables to customise your setup.
 
-server 'test-commerce-staging.com', user: 'user', roles: %{web app}
+#server 'test-commerce-staging.com', user: 'user'
 
 # Custom SSH Options
 # ==================
@@ -46,7 +46,7 @@ server 'test-commerce-staging.com', user: 'user', roles: %{web app}
 # --------------
 # set :ssh_options, {
 #    keys: %w(/home/user/.ssh/id_rsa),
-#    forward_agent: false,
+#    forward_agent: true,
 #    auth_methods: %w(password)
 # }
 #
