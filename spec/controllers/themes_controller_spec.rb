@@ -14,6 +14,10 @@ end
 RSpec.shared_examples "uncussessfull create_completed" do
   it { expect(Theme.count).to be_zero }
   it { is_expected.to redirect_to action: :new }
+  it "should set flash" do
+    subject
+    expect(controller).to set_flash[:alert]
+  end
 end
 
 RSpec.describe ThemesController, type: :controller do
@@ -84,6 +88,10 @@ RSpec.describe ThemesController, type: :controller do
             context "when parsing key: #{key}" do
               it_behaves_like "creating Theme in DB", key, theme_name
               it { is_expected.to redirect_to action: :index }
+              it "should set flash" do
+                subject
+                expect(controller).to set_flash[:notice]
+              end
             end
           end
           context "when theme already exists" do
