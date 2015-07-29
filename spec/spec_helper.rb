@@ -88,7 +88,8 @@ RSpec.configure do |config|
   if config.files_to_run.one?
     # Use the documentation formatter for detailed output,
     # unless a formatter has already been configured
-    # (e.g. via a command-line flag).
+    # (e.g. via a command-line flag).Capybara.default_driver    = :poltergeist
+
     config.default_formatter = 'doc'
   end
 
@@ -123,8 +124,6 @@ RSpec.configure do |config|
 
   # DatabaseCleaner configuration
   config.before(:suite) do
-    Account.destroy_all
-    Apartment::Tenant.reset
      # Clean all tables to start
     DatabaseCleaner.clean_with :truncation
     # Use transactions for tests
@@ -136,18 +135,22 @@ RSpec.configure do |config|
   end
 
 
-  config.before(:each) do
+  # config.before(:each) do
+  #   Account.destroy_all
+  #   Apartment::Tenant.reset
+  #   DatabaseCleaner.clean_with :truncation
+  # end
+
+  config.around(:each) do |example|
+    ActionMailer::Base.deliveries.clear
     Account.destroy_all
     Apartment::Tenant.reset
-    DatabaseCleaner.clean_with :truncation
+    DatabaseCleaner.cleaning do
+      example.run
+      Account.destroy_all
+      Apartment::Tenant.reset
+    end
   end
-
-  # config.around(:each) do |example|
-  #   ActionMailer::Base.deliveries.clear
-  #   DatabaseCleaner.cleaning do
-  #     example.run
-  #   end
-  # end
 
   config.expect_with :rspec do |c|
     c.syntax = :expect
