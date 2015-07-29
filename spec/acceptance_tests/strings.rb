@@ -1,5 +1,5 @@
 module Strings
-  def self.get
+  def self.[](key)
     { 
       #UI elements
         #start page
@@ -34,6 +34,6 @@ module Strings
         themes_index_page:  '/themes',
         themes_new_page:  '/themes/new',
         themes_create_completed:  '/themes/create_completed',
-    }
+    }[key]
   end
 end

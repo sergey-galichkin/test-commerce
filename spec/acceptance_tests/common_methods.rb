@@ -1,6 +1,8 @@
 module Common_methods
+require './spec/acceptance_tests/strings.rb'
+
   def strings(str)
-    Strings.get[str]
+    Strings[str]
   end
 
   def visit_url(url)
