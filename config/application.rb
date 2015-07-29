@@ -32,18 +32,28 @@ module TestCommerce
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
 
-  # ActionMailer config
-  config.action_mailer.default_url_options = { :host => ENV["HOST"] }
-  config.action_mailer.raise_delivery_errors = true
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.perform_deliveries = true
-  config.action_mailer.smtp_settings = {
-    address: "smtp.gmail.com",
-    port: 587,
-    domain: ENV["GMAIL_DOMAIN"],
-    authentication: "plain",
-    enable_starttls_auto: true,
-    user_name: ENV["GMAIL_USERNAME"],
-    password: ENV["GMAIL_PASSWORD"]}
+    config.active_job.queue_adapter = :sidekiq
+
+    # ActionMailer config
+    config.action_mailer.default_url_options = { :host => ENV["HOST"] }
+    config.action_mailer.raise_delivery_errors = true
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.perform_deliveries = true
+    config.action_mailer.smtp_settings = {
+      address: "smtp.gmail.com",
+      port: 587,
+      domain: ENV["GMAIL_DOMAIN"],
+      authentication: "plain",
+      enable_starttls_auto: true,
+      user_name: ENV["GMAIL_USERNAME"],
+      password: ENV["GMAIL_PASSWORD"]}
+
+    # AWS bucket config
+    config.aws_max_theme_zip_file_length = 1.gigabyte
+    config.aws_access_key = ENV["AWS_ACCESS_KEY"]
+    config.aws_secret_access_key = ENV["AWS_SECRET_ACCESS_KEY"]
+    config.aws_public_bucket_name = "flexcommerce-uploadedthemes"
+    config.aws_private_bucket_name = "flexcommerce-productionthemes"
+    config.aws_region = "us-east-1"
   end
 end

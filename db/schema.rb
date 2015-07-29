@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150616064739) do
+ActiveRecord::Schema.define(version: 20150624111841) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,11 +32,19 @@ ActiveRecord::Schema.define(version: 20150616064739) do
     t.boolean  "can_update_users_password",            default: false, null: false
     t.boolean  "can_update_users_role",                default: false, null: false
     t.boolean  "can_delete_users",                     default: false, null: false
+    t.boolean  "can_create_themes",                    default: false, null: false
+    t.boolean  "can_delete_themes",                    default: false, null: false
     t.datetime "created_at",                                           null: false
     t.datetime "updated_at",                                           null: false
   end
 
   add_index "roles", ["name"], name: "index_roles_on_name", unique: true, using: :btree
+
+  create_table "themes", force: :cascade do |t|
+    t.string  "name",         limit: 100,              null: false
+    t.string  "zip_file_url", limit: 2000,             null: false
+    t.integer "status",                    default: 0, null: false
+  end
 
   create_table "users", force: :cascade do |t|
     t.string   "email",                  default: "", null: false

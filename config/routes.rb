@@ -13,8 +13,15 @@ Rails.application.routes.draw do
   # Put here routes to tenant-resource only
   constraints ->(request) { request.subdomain.present? } do
     get 'accounts/login_with_token' => 'accounts#login_with_token'
+    resources :themes, only: [:index, :new, :destroy]
+    get 'themes/create_completed' => "themes#create_completed" #redirect from AWS
     devise_for :users, skip: :registrations
     resources :users, except: :show
+  end
+
+  require 'sidekiq/web'
+  authenticate :user do
+    mount Sidekiq::Web => '/sidekiq'
   end
 
   # Example of regular route:

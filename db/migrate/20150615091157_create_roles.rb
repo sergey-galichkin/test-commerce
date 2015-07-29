@@ -6,6 +6,8 @@ class CreateRoles < ActiveRecord::Migration
       t.boolean :can_update_users_password, null: false, default: false
       t.boolean :can_update_users_role, null: false, default: false
       t.boolean :can_delete_users, null: false, default: false
+      t.boolean :can_create_themes, null: false, default: false
+      t.boolean :can_delete_themes, null: false, default: false
 
       t.timestamps null: false
     end

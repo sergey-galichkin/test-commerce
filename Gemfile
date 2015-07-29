@@ -16,11 +16,13 @@ gem 'coffee-rails', '~> 4.1.0'
 
 # Use apartment for multi-tenant databases
 gem 'apartment', '~> 1.0.1'
+gem 'apartment-sidekiq', '~> 0.2.0'
 
 #bootstrap CSS
 #gem 'bootstrap-sass'
 # Devise is a flexible authentication solution for Rails based on Warden
 gem 'devise', '~> 3.5.1'
+gem 'devise-async', '~>0.10.1'
 
 # simple authorization solution for Rails which is decoupled from user roles
 gem 'cancancan', '~> 1.12.0'
@@ -36,6 +38,11 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 
 gem 'slim-rails', '~> 3.0.1'
 
+# Simple, efficient background processing
+gem 'sidekiq', '~> 3.4.2'
+# For Sidekiq monitor
+gem 'sinatra', '~> 1.4.6'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
@@ -47,6 +54,9 @@ gem 'unicorn', '~> 4.9.0'
 
 # Shim to load environment variables from .env into ENV in development.
 gem 'dotenv-rails', '~> 2.0.2', :groups => [:development, :test]
+
+# Official Amazon AWS SDK
+gem 'aws-sdk', '~> 2.1.7'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -64,11 +74,13 @@ group :test do
   gem 'capybara', '~> 2.4.4'
   gem 'database_cleaner', '~> 1.4.1'
   gem 'rspec-rails', '~> 3.2.3'
+  gem 'rspec-its', '~> 1.2.0'
   gem 'factory_girl', '~> 4.5.0'
   gem 'rspec-expectations', '~> 3.2.1'
   gem 'factory_girl_rails', '~> 4.0'
   gem 'shoulda-matchers', '~> 2.8.0'
   gem 'faker', '~> 1.4.3'
+  gem 'rspec-activejob', '~> 0.4.1'
 end
 
 # Deployment

@@ -1,0 +1,11 @@
+= form_tag(theme_upload_params[:form_action], multipart: true, enforce_utf8: false, authenticity_token: false)
+
+  = hidden_field_tag('key', theme_upload_params[:file_id])
+  = hidden_field_tag('AWSAccessKeyId', theme_upload_params[:access_key])
+  = hidden_field_tag('acl', theme_upload_params[:acl])
+  = hidden_field_tag('success_action_redirect', theme_upload_params[:redirect_url])
+  = hidden_field_tag('policy', theme_upload_params[:policy])
+  = hidden_field_tag('signature', theme_upload_params[:signature])
+
+  = file_field_tag('file', accept: '.zip')
+  = submit_tag('Upload Theme')
